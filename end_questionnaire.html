@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="javascript/jquery-3.1.1.min.js"></script>
+    <script src="survey-jquery/survey.jquery.js"></script>
+    <script src="/assets/javascripts/jatos.js"></script>
+    <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
+    <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+
+</head>
+
+<body>
+    <div class ="FormBox" id="info_form"></div>
+
+    <script>
+        jatos.onLoad(function () {
+
+            Survey.Survey.cssType = "bootstrap";
+            Survey.defaultBootstrapCss.navigationButton = "btn btn-green";
+
+            window.survey = new Survey.Model({
+                pages: [
+                {
+                name: "page1",
+                elements: [
+                    {
+                    type: "panel",
+                    name: "panel1",
+                    elements: [
+                    {
+                    type: "rating",
+                    name: "question1",
+                    title: {
+                        default: "How would you rate the degree of difficulty of the task?",
+                        fr: "Quelle était le degré de difficulté de la tâche?"
+                    },
+                    isRequired: true,
+                    rateValues: [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ],
+                    minRateDescription: {
+                        default: "Very easy",
+                        fr: "Très facile"
+                    },
+                    maxRateDescription: {
+                        default: "Very difficult",
+                        fr: "Très difficile"
+                    }
+                    },
+                    {
+                    type: "comment",
+                    name: "question5",
+                    title: {
+                        default: "Describe your strategy for finding the target sound",
+                        fr: "Décrivez votre stratégie pour retrouver le son cible."
+                    }
+                    },
+                    {
+                    type: "rating",
+                    name: "question3",
+                    title: {
+                        default: "How much did the visual presentation of the sounds help you find the target?",
+                        fr: "À quel point les images représentant les sons vous ont aidé dans votre recherche?"
+                    },
+                    isRequired: true,
+                    minRateDescription: {
+                        default: "Not at all helpful",
+                        fr: "Pas du tout aidé"
+                    },
+                    maxRateDescription: {
+                        default: "Very helpful",
+                        fr: "Beaucoup aidé"
+                    }
+                    },
+                    {
+                    type: "rating",
+                    name: "question2",
+                    title: {
+                        default: "How much did the spatial positioning of the sounds help you in your search?",
+                        fr: "À quel point la disposition spatiale des sons vous a aidé dans votre recherche?"
+                    },
+                    isRequired: true,
+                    minRateDescription: {
+                        default: "Not at all helpful",
+                        fr: "Pas du tout aidé"
+                    },
+                    maxRateDescription: {
+                        default: "Very helpful",
+                        fr: "Beaucoup aidé"
+                    }
+                    }
+                    ],
+                    title: {
+                    default: "In the first set of tasks:",
+                    fr: "Dans la première partie:"
+                    }
+                    },
+                    {
+                    type: "panel",
+                    name: "panel2",
+                    elements: [
+                    {
+                    type: "rating",
+                    name: "question9",
+                    title: {
+                        default: "How would you rate the degree of difficulty of the task?",
+                        fr: "Quelle était le degré de difficulté de la tâche ?"
+                    },
+                    isRequired: true,
+                    rateValues: [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ],
+                    minRateDescription: {
+                        default: "Very easy",
+                        fr: "Très facile"
+                    },
+                    maxRateDescription: {
+                        default: "Very difficult",
+                        fr: "Très difficile"
+                    }
+                    },
+                    {
+                    type: "comment",
+                    name: "question6",
+                    title: {
+                        default: "Describe your strategy for finding the target sound",
+                        fr: "Décrivez votre stratégie pour retrouver le son cible."
+                    }
+                    }
+                    ],
+                    title: {
+                    default: "In the second set of tasks:",
+                    fr: "Dans la deuxième partie:"
+                    }
+                    },
+                    {
+                    type: "panel",
+                    name: "panel3",
+                    elements: [
+                    {
+                    type: "rating",
+                    name: "question4",
+                    title: {
+                        default: "Did you perceive a link between the sounds you heard and the images representing them?",
+                        fr: "Est-ce que vous avez perçu un lien entre le son entendu et l’image qui le représentait?"
+                    },
+                    isRequired: true,
+                    minRateDescription: {
+                        default: "No link at all",
+                        fr: "Aucun lien"
+                    },
+                    maxRateDescription: {
+                        default: "Strong link",
+                        fr: "Lien fort"
+                    }
+                    },
+                    {
+                    type: "comment",
+                    name: "question8",
+                    visibleIf: "{question7} = \"item1\"",
+                    title: {
+                        default: "Please elaborate",
+                        fr: "Si oui, élaborez:"
+                    }
+                    }
+                    ],
+                    title: {
+                    default: "In general",
+                    fr: "En général"
+                    }
+                    }
+                ]
+                }
+                ]
+                });
+
+            var lang = "default";
+            if (jatos.studySessionData.language){
+                lang = jatos.studySessionData.language;
+            }
+            survey.locale = lang;
+            survey.onComplete.add(function (result) {
+                $("#info_form").hide(); // Hides the 'Thank you for completing ...' message
+                jatos.submitResultData(JSON.stringify(result.data), jatos.startNextComponent);
+            });
+
+            $("#info_form").Survey({
+                model: survey
+            });
+
+        });
+    </script>
+</body>
+
+</html>

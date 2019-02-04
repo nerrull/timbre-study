@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <script src="p5/p5.min.js"></script>
+    <script src="jspsych-6.0.4/jspsych.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-image-keyboard-response.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-audio-button-response.js"></script>
+    <script src="audio-image-space.js"></script>
+
+    <script src="javascript/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/jatos.js"></script>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    
+</body>
+
+<script>
+    /* create timeline */
+    var timeline = [];
+
+    var test_sounds = ['static/audio/0.mp3', 'static/audio/1.mp3','static/audio/2.mp3'];
+    var test_images = ['static/image/0.png','static/image/1.png', 'static/image/2.png'];
+    var test_coordinates = [[0,0],[0.5,0.5], [0.8,0.8]];
+    /* define welcome message trial */
+    var welcome = {
+        type: "html-keyboard-response",
+        stimulus: "Welcome to the experiment. Press any key to begin."
+    };
+    timeline.push(welcome);
+
+    var image_space = {
+        type:"audio-image-space",
+        sounds: test_sounds,
+        images: test_images,
+        coordinates : test_coordinates,
+        dims : [800,800],
+        coordinates: test_coordinates,
+        target_index: 0
+    }
+    timeline.push(image_space);
+
+    jatos.onLoad(function () {
+        jsPsych.init({
+            timeline: timeline,
+            preload_audio: test_sounds,
+            on_finish: function() {
+                var resultJson = jsPsych.data.get().json();
+                jatos.submitResultData(resultJson, jatos.startNextComponent);
+            }
+        });
+    });
+    </script>
+
+</body>

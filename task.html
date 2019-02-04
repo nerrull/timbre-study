@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <script src="p5/p5.min.js"></script>
+    <script src="jspsych-6.0.4/jspsych.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-image-keyboard-response.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-audio-button-response.js"></script>
+    <script type="text/javascript" src="toxiclib/toxiclibs.min.js"></script>
+    <script src="utils/audio.js"></script>
+    <script src="utils/force_graph.js"></script>
+    <script src="utils/processing_sketches.js"></script>
+
+    <script src="audio-image-space.js"></script>
+    <script src="javascript/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/jatos.js"></script>
+    <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+
+<script>
+
+
+    jatos.onLoad(function () {
+
+        /* create timeline */
+        var timeline = [];
+
+        var test_sounds = [];
+        var test_images = [];
+        var test_coordinates = [];
+        var test_colors = [];
+        var test_envelopes =[];
+
+        var sess =jatos.studySessionData;
+        console.log(sess);
+        console.log(`Task index ${sess.task_index}`);
+
+        var samples = sess.task_dict[sess.phase_index][sess.task_index]
+        
+
+        for (var i =0; i<samples.length; i++){
+            var index = samples[i];
+            var sample= sess.sample_data.samples[index]
+            console.log(sample);
+            test_sounds.push(`static/audio/${sample.name}.mp3`);
+            test_images.push(`static/image/${index}.png`);
+            test_coordinates.push([sample.coords[0], sample.coords[1]])
+            test_colors.push([sample.color[0], sample.color[1], sample.color[2]])
+            test_envelopes.push(sample.spectrum);
+
+            // test_envelopes.push(sample.env);
+        }
+        console.log(test_sounds);
+        console.log(test_images);
+        console.log(test_coordinates);
+
+        /* define image space trial */
+        var image_space = {
+            type:"audio-image-space",
+            sounds: test_sounds,
+            images: test_images,
+            colors: test_colors,
+            envelopes: test_envelopes,
+
+            coordinates : test_coordinates,
+            dims : [800,800],
+            image_size: 64,
+            target_index: 0,
+            trial_index:sess.task_index,
+            num_trials:sess.num_tasks
+        }
+        timeline.push(image_space);
+
+
+        jsPsych.init({
+            timeline: timeline,
+            preload_audio: test_sounds,
+            on_finish: function() {
+                var resultJson = jsPsych.data.get().json();
+              
+                jatos.studySessionData.task_index += 1;
+                if (jatos.studySessionData.task_index >= jatos.studySessionData.num_tasks){
+                    jatos.studySessionData.phase_index +=1;
+                    jatos.studySessionData.task_index = 0;
+                }
+
+                //Only 2 phases
+                if (jatos.studySessionData.phase_index >=2){
+                        jatos.submitResultData(resultJson, jatos.startNextComponent);
+                }
+                else{
+                    jatos.submitResultData(resultJson);
+                    jatos.startComponent(25);
+                }
+                
+                
+            }
+        });
+    });
+
+    </script>
+
+</body>

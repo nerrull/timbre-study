@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <script src="utils/audio-player.js"></script>
+    <script src="javascript/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/jatos.js"></script>
+    <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="all"  href="static/css/forms.css" >
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class=TitleBox id=title></div>
+    <div class=FormBox >
+        <div id=description></div>  
+        <button id=play1>Play 1</button> 
+        <button id=play2>Play 2</button> 
+        <button id=play3>Play 3</button> 
+
+        <button id=continue>Continue</button> 
+    </div>
+</body>
+
+<script>
+    /* create timeline */
+    var timeline = [];
+
+    var test_sounds = ['static/audio/0.mp3', 'static/audio/1.mp3','static/audio/2.mp3'];
+
+    var lang = "default";
+    if (jatos.studySessionData.language){
+        lang = jatos.studySessionData.language;
+    }
+    jatos.onLoad(function () {
+        $.ajax({
+            url:"static/html/calibration.html",
+            type:'GET',
+            success: function(data) {
+                var description;
+                $('#title').html( $('<div>').append(data).find(`#${lang}`).find('#title'));
+                $('#description').html( $('<div>').append(data).find(`#${lang}`).find('#text'));
+                }
+            });
+
+        $("#continue").click(function(){
+            jatos.startNextComponent();
+        });
+
+    });
+    </script>
+
+</body>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="javascript/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/jatos.js"></script>
+    <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
+    <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+</head>
+
+<body>
+    <div >
+    <div class="TaskCanvasContainer">
+    <h2 class =centered>Choisissez votre language/Choose your language</h2>
+    <button class="btn btn-primary centered" id="french_button">Français </button>
+    <button class="btn btn-success centered" id="english_button">English</button>    
+
+    </div>
+
+
+    </div>
+    </div>
+
+    <script>
+      
+        function sessionSuccess(){
+            console.log("Succesfully sent session data");
+            console.log(jatos.studySessionData);
+
+        }
+
+        function sessionFailure(){
+            console.log("Failed to send session data");
+        }
+        function setSessionLanguage(lang){
+            jatos.studySessionData["language"] = lang;
+        }
+
+
+        jatos.onLoad(function () {
+            jatos.studySessionData.taskComponentIndex = 6;
+            $("#english_button").click(function(){
+                setSessionLanguage("default")
+                jatos.startNextComponent();
+            });
+            $("#french_button").click(function(){
+                setSessionLanguage("fr")
+                jatos.startNextComponent();
+            });
+
+
+                
+        });
+    </script>
+</body>
+
+</html>

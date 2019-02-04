@@ -1,0 +1,5 @@
+archive/
+static/audio/*.mp3
+static/image/*.png
+.vscode
+*~

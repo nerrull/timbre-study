@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="javascript/jquery-3.1.1.min.js"></script>
+    <script src="survey-jquery/survey.jquery.js"></script>
+    <script src="/assets/javascripts/jatos.js"></script>
+    <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
+    <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+</head>
+
+<body>
+    <div >
+    <div class=TitleBox id = titleBox></div>
+
+    <div class=FormBox>
+    <div id="consent_start"></div>
+    <div id="consent_form"></div>
+    </div>
+    </div>
+
+    <script>
+        jatos.onLoad(function () {
+            var lang = "default";
+            if (jatos.studySessionData.language){
+                lang = jatos.studySessionData.language
+            }
+
+            Survey.Survey.cssType = "bootstrap";
+            Survey.defaultBootstrapCss.navigationButton = "btn btn-green";
+            
+            $.ajax({
+            url:"static/html/consent.html",
+            type:'GET',
+            success: function(data) {
+                var content = $('<div>').append(data).find(`#${lang}`).find('#consent_form_start');
+                $('#consent_start').html( content );
+
+                var end_content = $('<div>').append(data).find(`#${lang}`).find('#consent_form_end').html();
+
+                $('#titleBox').html($('<div>').append(data).find(`#${lang}`).find('#title'));  
+
+                console.log(end_content)
+                window.survey = new Survey.Model({
+                    pages: [
+                    {
+                    name: "page1",
+                    elements: [
+                        {
+                        type: "boolean",
+                        name: "Let me know when the tool is available ",
+                        title: {
+                        fr: "Avisez-moi lorsque l’outil sera public"
+                        },
+                        defaultValue: "false",
+                        label: {
+                        default: "Let me know when the tool is available ",
+                        fr: "Avisez-moi lorsque l’outil sera public"
+                        }
+                        },
+                        {
+                        type: "boolean",
+                        name: "Contact me about follow-up studies",
+                        title: {
+                        fr: "Avisez-moi d’études ultérieures "
+                        },
+                        defaultValue: "false",
+                        label: {
+                        default: "Contact me about follow-up studies",
+                        fr: "Avisez-moi d’études ultérieures "
+                        }
+                        },
+                        {
+                        type: "text",
+                        name: "email",
+                        isRequired: true,
+                        visibleIf: "{Contact me about follow-up studies} = true or {Let me know when the tool is available } = true",
+                        title: {
+                        default: "E-mail address",
+                        fr: "Votre courriel "
+                        },
+                        validators: [
+                        {
+                        type: "email"
+                        }
+                        ],
+                        inputType: "email"
+                        },
+                        {
+                        type: "html",
+                        name: "end_content",
+                        html: end_content
+                        }
+                    ]
+                    }
+                    ],
+                    showQuestionNumbers: "off",
+                    completeText: {
+                    default: "I Accept",
+                    fr: "J'accepte"
+                    },
+                    maxTimeToFinish: -1
+                    });
+                    
+
+                survey.locale = lang;
+                survey.onComplete.add(function (result) {
+                    $("#consent_form").hide(); // Hides the 'Thank you for completing ...' message
+                    jatos.submitResultData(JSON.stringify(result.data), jatos.startNextComponent);
+                });
+
+                $("#consent_form").Survey({
+                    model: survey
+                });    
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
