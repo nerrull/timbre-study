@@ -57,7 +57,7 @@ makeGraph = function (coords, physics, imSize) {
 
 getPhysics =function(imSize, width, height){
     physics =new VerletPhysics2D();
-    physics.setWorldBounds(new Rect(imSize / 2 + 5, imSize / 2 + 5,
+    physics.setWorldBounds(new Rect(imSize  / 2+ 5, imSize / 2 + 5,
         width - imSize - 5, height - imSize) - 5);
-    return physics
+    return physics;
 }

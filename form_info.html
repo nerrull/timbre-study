@@ -3,269 +3,48 @@
 
 <head>
     <script src="javascript/jquery-3.1.1.min.js"></script>
-    <script src="survey-jquery/survey.jquery.js"></script>
+    <!-- <script src="survey-jquery/survey.jquery.js"></script> -->
     <script src="/assets/javascripts/jatos.js"></script>
+    <script src="https://surveyjs.azureedge.net/1.0.68/survey.jquery.min.js"></script>
     <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
+    <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+
 </head>
 
 <body>
-    <div class=FormBox id="info_form"></div>
+    <div >
+    <div class=FormBox>
+        <h2>Information</h2>
+        <div id="info"></div>
+        <div id="info_form"></div>
+    </div>
+    </div>
 
     <script>
         jatos.onLoad(function () {
 
+
+            var complete = function (result) {
+                $("#info_form").hide(); // Hides the 'Thank you for completing ...' message
+                jatos.submitResultData(JSON.stringify(result.data), jatos.startNextComponent);
+            }
+
             Survey.Survey.cssType = "bootstrap";
             Survey.defaultBootstrapCss.navigationButton = "btn btn-green";
-
-            window.survey = new Survey.Model({
-                pages: [
-                {
-                name: "Info form",
-                elements: [
-                    {
-                    type: "text",
-                    name: "age",
-                    title: {
-                    default: "Your age",
-                    fr: "Votre âge"
-                    },
-                    isRequired: true,
-                    validators: [
-                    {
-                    type: "numeric",
-                    text: {
-                        default: "Your age is likely between 0 and 120",
-                        fr: "Votre âge est surement ent 0 et 120"
-                    },
-                    minValue: 0,
-                    maxValue: 120
-                    }
-                    ]
-                    },
-                    {
-                    type: "radiogroup",
-                    name: "Input device",
-                    title: {
-                    default: "Please specify your pointing device for this experiment",
-                    fr: "Spécifiez votre dispositif de pointage pour cette expérience"
-                    },
-                    isRequired: true,
-                    choices: [
-                    {
-                    value: "item1",
-                    text: {
-                        default: "Computer mouse",
-                        fr: "Souris d'ordinateur"
-                    }
-                    },
-                    {
-                    value: "item2",
-                    text: {
-                        default: "Laptop trackpad",
-                        fr: "Pavé tactile"
-                    }
-                    }
-                    ]
-                    },
-                    {
-                    type: "radiogroup",
-                    name: "Speaker type",
-                    title: {
-                    default: "Please specify your speaker type (please use headphones if available)",
-                    fr: "Spécifiez le type de haut-parleurs que vous utilisez (s'il vous plait utilisez des écouteurs si disponibles)"
-                    },
-                    isRequired: true,
-                    choices: [
-                    {
-                    value: "item1",
-                    text: {
-                        default: "Integrated (laptop) speakers",
-                        fr: "Haut-parleurs intégrés (de portable)"
-                    }
-                    },
-                    {
-                    value: "item2",
-                    text: {
-                        default: "External speakers",
-                        fr: "Haut-parleurs externes"
-                    }
-                    },
-                    {
-                    value: "item3",
-                    text: {
-                        default: "Earphones/Headphones",
-                        fr: "Écouteurs"
-                    }
-                    }
-                    ]
-                    },
-                    {
-                    type: "rating",
-                    name: "Environment quality",
-                    title: {
-                    default: "Please rate the quality of your listening environment (please move to a quiet environment if possible)",
-                    fr: "S'il vous plait attribuer une cote à votre environnement d'écoute (et trouvez un environnement silencieux si possible)."
-                    },
-                    isRequired: true,
-                    rateValues: [
-                    {
-                    value: 1,
-                    text: {
-                        default: "1 Very noisy",
-                        fr: "1 Très bruyant"
-                    }
-                    },
-                    2,
-                    3,
-                    4,
-                    {
-                    value: 5,
-                    text: {
-                        default: "5 Silent",
-                        fr: "5 Silencieux"
-                    }
-                    }
-                    ]
-                    },
-                    {
-                    type: "rating",
-                    name: "Sound experience",
-                    title: {
-                    default: "How many years of sound experience do you have (e.g years playing music, working with sound) ",
-                    fr: "Combien d'années d'expérience avez vous? (e.g années passées à jouer de la musique, travailler avec le son) "
-                    },
-                    isRequired: true,
-                    rateValues: [
-                    {
-                    value: 1,
-                    text: "0"
-                    },
-                    {
-                    value: 2,
-                    text: "1-2"
-                    },
-                    {
-                    value: 3,
-                    text: "2-5"
-                    },
-                    {
-                    value: 4,
-                    text: "5-10"
-                    },
-                    {
-                    value: 5,
-                    text: "10+"
-                    }
-                    ]
-                    },
-                    {
-                    type: "radiogroup",
-                    name: "Sound work",
-                    title: {
-                        default: "Do you work with sound on a computer?",
-                        fr: "Tavaillez-vous avec le son sur un ordinateur?"
-                        },
-                    isRequired: true,
-                    choices: [
-                    {
-                    value: "item1",
-                    text: "Yes"
-                    },
-                    {
-                    value: "item2",
-                    text: "No"
-                    }
-                    ]
-                    },
-                    {
-                    type: "checkbox",
-                    name: "name",
-                    visibleIf: "{Sound work} = true",
-                    title: {
-                    default: "What kind of work do you do with sound?",
-                    fr: "Quel genre de travail faites-vous avec le son?"
-                    },
-                    hasOther: true,
-                    choices: [
-                    {
-                    value: "item1",
-                    text: {
-                        default: "Musician",
-                        fr: "Musicien"
-                    }
-                    },
-                    {
-                    value: "item2",
-                    text: {
-                        default: "Sound engineer",
-                        fr: "Ingénieur Sonore"
-                    }
-                    },
-                    {
-                    value: "item3",
-                    text: "Mixing/Mastering"
-                    },
-                    {
-                    value: "item4",
-                    text: {
-                        default: "Special effects",
-                        fr: "Effets spéciaux"
-                    }
-                    }
-                    ]
-                    },
-                    {
-                    type: "checkbox",
-                    name: "Audio tools",
-                    visibleIf: "{Sound work} = true",
-                    title: {
-                    default: "What tools do you use to work with sound (check any that apply):",
-                    fr: "Quels outils utilisez-vous pour tavailler avec le son?"
-                    },
-                    hasOther: true,
-                    choices: [
-                    {
-                    value: "item1",
-                    text: {
-                        default: "DAW (Digital audio workstation)",
-                        fr: "DAW (Station audionumérique)"
-                    }
-                    },
-                    {
-                    value: "item2",
-                    text: {
-                        default: "Video editor",
-                        fr: "Éditeur vidéo"
-                    }
-                    },
-                    {
-                    value: "item3",
-                    text: {
-                        default: "Filesystem",
-                        fr: "Système de fichiers"
-                    }
-                    }
-                    ]
-                    }
-                ]
-                }
-                ]
-                });
+            var surveyJSON = { surveyId: 'a4ebeb94-b6fd-4cfb-a90d-f95834ef8da9'}
 
             var lang = "default";
             if (jatos.studySessionData.language){
                 lang = jatos.studySessionData.language;
             }
-            survey.locale = lang;
-            survey.onComplete.add(function (result) {
-                $("#info_form").hide(); // Hides the 'Thank you for completing ...' message
-                jatos.submitResultData(JSON.stringify(result.data), jatos.startNextComponent);
-            });
+
+            var survey = new Survey.Model(surveyJSON);
 
             $("#info_form").Survey({
-                model: survey
+                model: survey,
+                onComplete: complete,
+                locale: lang
             });
-
         });
     </script>
 </body>

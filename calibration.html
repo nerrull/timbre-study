@@ -3,7 +3,9 @@
 <html>
 
 <head>
-    <script src="utils/audio-player.js"></script>
+    <script src="jspsych-6.0.4/jspsych.js"></script>
+
+    <script src="utils/audio.js"></script>
     <script src="javascript/jquery-3.1.1.min.js"></script>
     <script src="/assets/javascripts/jatos.js"></script>
     <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
@@ -19,7 +21,6 @@
         <button id=play1>Play 1</button> 
         <button id=play2>Play 2</button> 
         <button id=play3>Play 3</button> 
-
         <button id=continue>Continue</button> 
     </div>
 </body>
@@ -45,7 +46,20 @@
                 }
             });
 
+        var context = jsPsych.pluginAPI.audioContext();
+        let player = new SamplePlayer(context, jatos.studySessionData["calibration_samples"]);
+        $("#play1").click(function(){
+            player.playSound(0)
+        });
+        $("#play2").click(function(){
+            player.playSound(1)
+        });
+        $("#play3").click(function(){
+            player.playSound(2)
+        });
+        debugger;
         $("#continue").click(function(){
+            player.unbind()
             jatos.startNextComponent();
         });
 

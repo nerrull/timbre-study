@@ -12,55 +12,67 @@
     <script src="utils/audio.js"></script>
     <script src="utils/force_graph.js"></script>
     <script src="utils/processing_sketches.js"></script>
-
+    
     <script src="audio-image-space.js"></script>
     <script src="javascript/jquery-3.1.1.min.js"></script>
     <script src="/assets/javascripts/jatos.js"></script>
     <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
-
-
+    
+    
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    
 </head>
-
-<script>
-
-
+<body>
+<script>  
     jatos.onLoad(function () {
-
+        
         /* create timeline */
         var timeline = [];
-
+        
         var test_sounds = [];
         var test_images = [];
         var test_coordinates = [];
         var test_colors = [];
         var test_envelopes =[];
-
+        
         var sess =jatos.studySessionData;
         console.log(sess);
         console.log(`Task index ${sess.task_index}`);
-
-        var samples = sess.task_dict[sess.phase_index][sess.task_index]
         
-
+        var samples = sess.task_dict[sess.phase_index][sess.task_index];
+        var sample_data = JSON.parse(sessionStorage.getItem("sample_data"));
+        console.log(sample_data)
+        var target_index = 0;
         for (var i =0; i<samples.length; i++){
             var index = samples[i];
-            var sample= sess.sample_data.samples[index]
+            console.log(index);
+            
+            var sample= sample_data[index]
             console.log(sample);
             test_sounds.push(`static/audio/${sample.name}.mp3`);
-            test_images.push(`static/image/${index}.png`);
-            test_coordinates.push([sample.coords[0], sample.coords[1]])
-            test_colors.push([sample.color[0], sample.color[1], sample.color[2]])
-            test_envelopes.push(sample.spectrum);
+            test_images.push(`static/image/${sample.name}.png`);
+            if (sess.task_modes[sess.phase_index] =="PRACTICE")(
+                target_index = Math.floor(Math.random(0, samples.length))
+            )
+            if (sess.phase_index ==5){
+                test_coordinates.push([Math.random(), Math.random()])
+            }
 
+            else{
+                if (sample.coords[0]>0.9){
+                    sample.coords[0] = 0.9 *sample.coords[0];
+                }
+                test_coordinates.push([sample.coords[0], sample.coords[1]])
+            }
+            test_colors.push([sample.color[0], sample.color[1], sample.color[2]])
+            test_envelopes.push(sample.env);
+            
             // test_envelopes.push(sample.env);
         }
         console.log(test_sounds);
         console.log(test_images);
         console.log(test_coordinates);
-
         /* define image space trial */
         var image_space = {
             type:"audio-image-space",
@@ -68,43 +80,58 @@
             images: test_images,
             colors: test_colors,
             envelopes: test_envelopes,
-
+            mode :sess.task_modes[sess.phase_index],
+            
             coordinates : test_coordinates,
             dims : [800,800],
             image_size: 64,
             target_index: 0,
-            trial_index:sess.task_index,
-            num_trials:sess.num_tasks
+            task_index: sess.task_index,
+            phase_index: sess.phase_index,
+            num_trials: sess.num_tasks[sess.phase_index],
+            num_phases: sess.num_phases,
         }
         timeline.push(image_space);
-
-
+        
         jsPsych.init({
             timeline: timeline,
             preload_audio: test_sounds,
             on_finish: function() {
                 var resultJson = jsPsych.data.get().json();
-              
+/*                 console.log ("Results:\n" +resultJson)
+                console.log("Incrementing task index") */
                 jatos.studySessionData.task_index += 1;
-                if (jatos.studySessionData.task_index >= jatos.studySessionData.num_tasks){
+                //console.log("Task index:" + jatos.studySessionData.task_index)
+                //Increment phase index
+                if (jatos.studySessionData.task_index >= jatos.studySessionData.num_tasks[jatos.studySessionData.phase_index]){
                     jatos.studySessionData.phase_index +=1;
                     jatos.studySessionData.task_index = 0;
-                }
+                    
+                    if (jatos.studySessionData.phase_index ==  jatos.studySessionData.num_practices){
+                        jatos.submitResultData(resultJson);
+                        jatos.startComponentByPos(sess.studyStartComponentIndex);
 
-                //Only 2 phases
-                if (jatos.studySessionData.phase_index >=2){
+                    }
+                    //Go to questionnaire for last two task trials
+                    if (jatos.studySessionData.phase_index ==  jatos.studySessionData.num_phases-1 ||jatos.studySessionData.phase_index == jatos.studySessionData.num_phases){
                         jatos.submitResultData(resultJson, jatos.startNextComponent);
+                    }
+                    //Just go to new phase description
+                    else{
+                        jatos.submitResultData(resultJson);
+                        jatos.startComponentByPos(jatos.studySessionData.phaseComponentIndex);
+                    }
                 }
+                
+                //Continue tasks in current phase
                 else{
                     jatos.submitResultData(resultJson);
                     jatos.startComponentByPos(sess.taskComponentIndex);
                 }
-                
-                
             }
         });
     });
-
-    </script>
+    
+</script>
 
 </body>

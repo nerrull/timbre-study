@@ -6,123 +6,156 @@
     <script src="/assets/javascripts/jatos.js"></script>
     <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
     <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+    <script src="utils/uuid.js"></script>
+
 </head>
 
 <body>
-    <div >
-    <div class=TitleBox id="description_title"></div>
-
-    <div class=FormBox>
-    <div id="description"></div>
-    <button id="continue" type="button" class="btn btn-success">Continue</button>
+    <div class= "TaskDescription">
+        <div id="description_div"></div>
+        <button id="continue" type="button" class="btn btn-success">Continue</button>
+        </div>
+        </div>
     </div>
-    </div>
-
+    
     <script>
         function getRandomTaskID(){
-            var v  = Math.random()*2;
-            if (v >1 ){
-                return 0;
-            } 
-            else return 1;
+            let task_ids = ["TEXTURE", "COLOR", "SHAPE"]
+            let v  = Math.floor (Math.random()*3);
+            return task_ids[v];
         }
-
+        
         function shuffle(array) {
             var currentIndex = array.length, temporaryValue, randomIndex;
-
+            
             // While there remain elements to shuffle...
             while (0 !== currentIndex) {
-
+                
                 // Pick a remaining element...
                 randomIndex = Math.floor(Math.random() * currentIndex);
                 currentIndex -= 1;
-
+                
                 // And swap it with the current element.
                 temporaryValue = array[currentIndex];
                 array[currentIndex] = array[randomIndex];
                 array[randomIndex] = temporaryValue;
             }
-
             return array;
         }
+        
+        function generateTaskSamples( studyData, mode){
+            var taskDict = {};
+            var samples = {}
+            var nTasks = [1,6,6,6,6,6];
+            // var nTasks = [1,1,1,1,1,1];
 
 
-        function generateTaskSamples( studyData){
+            var nSamplesPerTask = [10,30,30,30,30,30];
+            // var nSamplesPerTask = [1,1,1,1,1,1];
+
+
+            var totalSamples = nTasks.map((v, i) => nSamplesPerTask[i]*v).reduce((pv, v) => pv+v)
+            console.log("Total study samples : " +totalSamples)
             var actual_num_samples = studyData["n_samples"]
             console.log("Number of samples : " + actual_num_samples )
-            var nTasks = 10;
-            var nPhases = 2;
-            var nSamplesPerPhase = 30;
-            var nTotalSamples = 1000;
-            var sampleIndexes = [...Array(nTotalSamples)].map((_,i) => i);
-            sampleIndexes = shuffle(sampleIndexes);
+            var nTotalSamples = actual_num_samples;
+            var shuffleIndexes = [...Array(nTotalSamples)].map((_,i) => i);
+            sampleIndexes = shuffle(shuffleIndexes);
+                        
+            while (sampleIndexes.length < totalSamples){
+                let s2 =  shuffle(shuffleIndexes.slice());
+                sampleIndexes = sampleIndexes.concat(s2);
+                console.log(sampleIndexes)
+            }
 
-            var taskDict = {};
+
+            var nPhases = nTasks.length;
+            jatos.studySessionData["num_tasks"] = nTasks;
+            
+            var task_modes = ["PRACTICE","BASELINE", "BASELINE", ...[...Array(3)].map((_,i)=>mode)]
+            jatos.studySessionData["task_modes"] = task_modes;
+            jatos.studySessionData["num_phases"] = nPhases;
+            
+
             sampleIndex =0;
+            // Generate sample sets for tasks
             for (var p =0; p<nPhases; p++){
                 taskDict[p]={};
-
-                for (var t =0; t<nTasks; t++){
+                
+                for (var t =0; t<nTasks[p]; t++){
                     var sampleList =[];
-
-                    for (var s =0; s<nSamplesPerPhase; s++){
-                        sampleList.push(sampleIndexes[sampleIndex])
+                    for (var s =0; s<nSamplesPerTask[p]; s++){
+                        sampleList.push(sampleIndexes[sampleIndex]);
+                        let sample = studyData.samples[sampleIndexes[sampleIndex]];
+                        samples[sampleIndexes[sampleIndex]] =  sample;
                         sampleIndex ++;
                     }
                     taskDict[p][t]= sampleList;
                 } 
             } 
-            return taskDict;
+            console.log(samples)
+            console.log(taskDict)
+
+            return [taskDict, samples];
         }
+        
         function sessionSuccess(){
             console.log("Succesfully sent session data");
             console.log(jatos.studySessionData);
-
         }
-
+        
         function sessionFailure(){
             console.log("Failed to send session data");
         }
-
-
+        
         jatos.onLoad(function () {
-            var json= $.getJSON("static/data/study_data.json", function(studyData){
-                console.log("Studydata");
-                console.log(studyData);
-                jatos.studySessionData["sample_data"] = studyData;
-                jatos.studySessionData["task_type"] = getRandomTaskID();
-                jatos.studySessionData["task_dict"] = generateTaskSamples(studyData);
-                jatos.studySessionData["num_tasks"] = 10;
+            jatos.studySessionData["task_type"] = getRandomTaskID();
+            var lang = "default";
+
+            if (jatos.studySessionData.language){
+                lang = jatos.studySessionData.language
+            }
+
+             //Load the correct description and display it
+             $.ajax({
+                    url:"static/html/task_descriptions.html",
+                    type:'GET',
+                    success: function(data) {
+                        console.log("Task type : " +jatos.studySessionData["task_type"])
+                        console.log("Language: "+lang)
+                        var description = $('<div>').append(data).find('#task_description').find(`#${lang}`);
+                        let title = $('<div>').append(data).find('#title').find(`#${lang}`)
+
+                        // console.log(description)
+                        // console.log(title)
+                        $('#description_div').html( description );
+                        }
+                });
+
+            var json= $.getJSON("static/data/study_data.json", function(studyData){         
+                tasks_samples = generateTaskSamples(studyData,jatos.studySessionData["task_type"] );
+                var samples = tasks_samples[1];
+                jatos.studySessionData["task_dict"] =tasks_samples[0];
                 jatos.studySessionData["task_index"] = 0;
                 jatos.studySessionData["phase_index"] = 0;
+                jatos.studySessionData["num_practices"] = 1;
 
-                var lang = "default";
-                if (jatos.studySessionData.language){
-                    lang = jatos.studySessionData.language
+                jatos.studySessionData["uuid"] = uuid4();
+                console.log("Participant UUID: "+jatos.studySessionData["uuid"])
+                calibration_samples = [];
+                for(var i =0; i<studyData["calibration_sample_indexes"].length;i++){
+                    let si = studyData["calibration_sample_indexes"][i];
+                    calibration_samples.push(studyData.samples[si]); 
                 }
-                //Load the correct description and display it
-                $.ajax({
-                url:"static/html/task_description.html",
-                type:'GET',
-                success: function(data) {
-                    var description;
-                    if (jatos.studySessionData["task_type"]==0){
-                        description = $('<div>').append(data).find('#texture_description').find(`#${lang}`);
-                    }
-                    if (jatos.studySessionData["task_type"]==1){
-                        description = $('<div>').append(data).find('#color_description').find(`#${lang}`);
-                    }
-                    $('#description').html( description );
-                    $("#description_title").html($('<div>').append(data).find('#title').find(`#${lang}`));
-                    }
-                });
-
+                jatos.studySessionData["calibration_samples"] = calibration_samples;
                 $("#continue").click(function(){
-                    jatos.submitResultData(JSON.stringify(jatos.studySessionData), jatos.startNextComponent);
+                    sessionStorage.removeItem("sample_data");
+                    jatos.submitResultData(JSON.stringify(jatos.studySessionData));
+                    sessionStorage.setItem("sample_data", JSON.stringify(samples))
+                    jatos.startNextComponent()
+                    });
+                });                
                 });
-            });                
-        });
-    </script>
-</body>
-
+        </script>
+    </body>
 </html>

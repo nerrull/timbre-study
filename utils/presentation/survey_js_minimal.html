@@ -1,0 +1,23 @@
+<head>
+    <script src="https://surveyjs.azureedge.net/1.0.68/survey.jquery.min.js"></script>
+</head>
+
+<body>
+    <div id="surveyContainer"></div>
+    
+    <script>
+        Survey.Survey.cssType = "bootstrap";
+        
+        var surveyJSON = { surveyId: 'a4ebeb94-b6fd-4cfb-a90d-f95834ef8da9'}
+        
+        function sendDataToServer(survey) {
+            survey.sendResult('876b228d-5576-4086-bfc1-5d927485ca9b');
+        }
+        
+        var survey = new Survey.Model(surveyJSON);
+        $("#surveyContainer").Survey({
+            model: survey,
+            onComplete: sendDataToServer
+        });
+    </script>
+</body>

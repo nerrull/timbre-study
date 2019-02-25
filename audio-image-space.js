@@ -58,17 +58,35 @@ jsPsych.plugins["audio-image-space"] = (function () {
         default: 0,
         description: 'Index of the target sound/image/coordinates'
       },
-      trial_index: {
+      mode: {
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Trial mode',
+        default: "baseline",
+        description: 'Mode of the trial (color, texture, shape, baseline)'
+      },
+      task_index: {
         type: jsPsych.plugins.parameterType.INT,
         pretty_name: 'Trial index',
         default: 0,
         description: 'Index of the trial'
+      },
+      phase_index: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'phase index',
+        default: 0,
+        description: 'Index of the trial phase'
       },
       num_trials: {
         type: jsPsych.plugins.parameterType.INT,
         pretty_name: 'Number of trials',
         default: 0,
         description: 'Number of Trials in the experiment'
+      },
+      num_phases: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Number of phases',
+        default: 0,
+        description: 'Number of phases in the experiment'
       }
     }
   }
@@ -77,6 +95,9 @@ jsPsych.plugins["audio-image-space"] = (function () {
   // https://github.com/processing/p5.js/wiki/Global-and-instance-mode
   plugin.trial = function (display_element, trial) {
     console.log(trial);
+    if (trial.mode == "PRACTICE_2"){
+      trial.image_size = 32;
+    }
 
     // Data to be saved
     var trial_data = {
@@ -84,11 +105,13 @@ jsPsych.plugins["audio-image-space"] = (function () {
       num_misclicks: 0,
       misclicks: [],
       mousePosition: [],
-
+      task_index: trial.task_index,
+      phase: trial.phase_index,
       elapsed_time: -1,
       start_time: -1,
       end_time: -1,
       listen_count: 0,
+      mode: trial.mode,
     };
 
     //Add a canvas_id div to the display element for p5 to draw to
@@ -104,23 +127,17 @@ jsPsych.plugins["audio-image-space"] = (function () {
     var headerHeight = 50;
 
     //Todo: language
-    var startMessageString = "Press any key to begin";
-    var headerMessage = "Find the sound! Press any key to replay it.";
+    var startMessageString = "Press the space bar to begin";
+    var headerMessage = "Find the sound! Press the space bar to replay it.";
     var progressString = "Progress:";
     var helpMessageString = "";
 
     //Initialize audio elements
     var context = jsPsych.pluginAPI.audioContext();
     var player = new SamplePlayer(context, trial.sounds);
-   
-    //Trial  callback functions
-    var misclick_increment = function (clicked_id) {
-      trial_data.misclicks.push(clicked_id);
-      trial_data.num_misclicks += 1;
-    }
 
     // End the trial and save the data
-    var end_trial = function () {
+    var end_trial = function (trial_data) {
       trial_data.end_time = new Date();
       trial_data.elapsed_time = trial_data.end_time - trial_data.start_time;
       console.log(trial_data)
@@ -128,12 +145,11 @@ jsPsych.plugins["audio-image-space"] = (function () {
       jsPsych.finishTrial(trial_data);
     }
 
-    //Play the target sound
-    var playTarget = function () {
-      trial_data.listen_count += 1;
-      // playSound(trial.target_index);
-      player.playSound(trial.target_index);
-    }
+    // //Play the target sound
+    // var playTarget = function () {
+    //   trial_data.listen_count += 1;
+    //   player.playSound(trial.target_index);
+    // }
 
     //Run force directed graph physics sim on points so there's no overlap
     var imSize = trial.image_size;
@@ -151,6 +167,7 @@ jsPsych.plugins["audio-image-space"] = (function () {
 
     //Create and populate array for checking what element is hovered (or clicked)
     var lookup_array = new Array(trial.dims[0] + imSize).fill(-1).map(() => new Array(headerHeight + trial.dims[1] + imSize).fill(-1));
+    
     makeLookupArray =function(){
       for (let idx = 0; idx < trial.coordinates.length; idx++) {
         let n = nodeGraph.nodes[idx];
@@ -158,6 +175,9 @@ jsPsych.plugins["audio-image-space"] = (function () {
         let startY = Math.round(n.y);
         for (let x = startX-imSize/2; x < startX + imSize/2; x++) {
           for (let y = startY-imSize/2; y < startY + imSize/2; y++) {
+            if (x >= lookup_array.length || y >= lookup_array[0].length ||x<0 ||y<0){
+              continue;
+            }
             lookup_array[x][y] = idx;
           }
         }
@@ -168,7 +188,6 @@ jsPsych.plugins["audio-image-space"] = (function () {
     params ={
       "trial":trial,
       "trial_data":trial_data,
-      "playTarget":playTarget,
       "player":player,
       "imSize":imSize ,
       "headerHeight":headerHeight,
@@ -179,10 +198,18 @@ jsPsych.plugins["audio-image-space"] = (function () {
       "nodeGraph": nodeGraph,
       "end_trial":end_trial,
       "drawDebug":true,
+      "mode":trial.mode,
     } 
     //init the sketch
-    s= get_shape_sketch(params);
-    var p5Instance = new p5(s, "p5_canvas_id");
+    if (trial.mode == "PRACTICE_2"){
+      s= get_highlight_sketch(params);
+      var p5Instance = new p5(s, "p5_canvas_id");
+    }
+    else {
+      s= get_sketch(params);
+      var p5Instance = new p5(s, "p5_canvas_id");
+    }
+
   };
 
   return plugin;

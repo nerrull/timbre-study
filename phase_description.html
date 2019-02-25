@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="javascript/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/jatos.js"></script>
+    <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
+    <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+</head>
+
+<body>
+    <div class= "TaskDescription">
+
+        <div id="description_div"></div>
+        <div id="reminder"></div>
+        <button id="continue" type="button" class="btn btn-success">Continue</button>
+        </div>
+        </div>
+    </div>
+    
+    <script>
+        
+        function sessionSuccess(){
+            console.log("Succesfully sent session data");
+            console.log(jatos.studySessionData);
+        }
+        
+        function sessionFailure(){
+            console.log("Failed to send session data");
+        } 
+        
+        jatos.onLoad(function () {
+            var lang = "default";
+            if (jatos.studySessionData.language){
+                lang = jatos.studySessionData.language
+            }
+
+             //Load the correct description and display it
+             $.ajax({
+                    url:"static/html/task_descriptions.html",
+                    type:'GET',
+                    success: function(data) {
+                        console.log("Task type : " +jatos.studySessionData["task_type"])
+                        console.log("Language: "+lang)
+                        var description;
+                        let task_type = jatos.studySessionData["task_type"]
+                        var description_id = "";
+                        let reminder = $('<div>').append(data).find('#general_reminder').find(`#${lang}`)
+
+                        // if (jatos.studySessionData.phase_index ==0){
+                        //     description_id = "practice_phase_1";
+                        //     description = $('<div>').append(data).find(`#${description_id}`).find(`#${lang}`);
+
+                        // }
+                        if (jatos.studySessionData.phase_index ==0){
+                            description_id = "practice_phase_2";
+                            description = $('<div>').append(data).find(`#${description_id}`).find(`#${lang}`);
+                        }
+
+                        else if (jatos.studySessionData.phase_index ==1){
+                            description_id = "phase_1";
+                            description = $('<div>').append(data).find(`#${description_id}`).find(`#${lang}`);
+                            $("#reminder").html(reminder);
+                        }
+                        else if (jatos.studySessionData.phase_index ==2){
+                            description_id = "phase_1_fast";
+                            description = $('<div>').append(data).find(`#${description_id}`).find(`#${lang}`);
+                            $("#reminder").html(reminder);
+                        }
+                        else if (jatos.studySessionData.phase_index ==3){
+                            description_id = "phase_2";
+                            description = $('<div>').append(data).find(`#${description_id}`).find(`#${task_type}`).find(`#${lang}`);
+                            $("#reminder").html(reminder);
+                        }
+                        else if (jatos.studySessionData.phase_index ==4){
+                            description_id = "phase_2_fast";
+                            description = $('<div>').append(data).find(`#${description_id}`).find(`#${lang}`);
+                            $("#reminder").html(reminder);
+
+                        }
+                        else if (jatos.studySessionData.phase_index ==5){
+                            description_id = "phase_3";
+                            description = $('<div>').append(data).find(`#${description_id}`).find(`#${task_type}`).find(`#${lang}`);
+                            $("#reminder").html(reminder);
+                        }
+
+                        console.log(description_id)
+                        console.log(description)
+                        // console.log(description.html())
+
+                        $('#description_div').html( description );
+
+
+                        mode_strings = {
+                            "default":{
+                                "COLOR":"colors",
+                                "TEXTURE":"visual texture",
+                                "SHAPE":"shapes"
+                            },
+                            "fr":{
+                                "COLOR":"couleurs",
+                                "TEXTURE":"textures visuelles",
+                                "SHAPE":"formes"
+                            }
+                        }
+                        document.body.innerHTML = document.body.innerHTML.replace(/MODE_STRING/g, mode_strings[lang][task_type]);
+                        $('#description_div').html( function(_, ctx){
+                            
+                                return ctx.replace(/MODE_STRING/g, mode_strings[lang][task_type]);
+                            });
+                    $("#continue").click(function(){
+                        jatos.startNextComponent()
+                    });
+                    }
+
+                });
+            
+                });
+        </script>
+    </body>
+</html>

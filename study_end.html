@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html>
+
+<script src="javascript/jquery-3.1.1.min.js"></script>
+<script src="/assets/javascripts/jatos.js"></script>
+<link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+
+<link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    
+</body>
+<div class=FormBox>
+    <div id="message_div"></div>
+</div>
+<script>
+    jatos.onLoad(function () {
+        
+        $.ajax({
+            url:"static/html/task_descriptions.html",
+            type:'GET',
+            success: function(data) {
+                
+                var lang = "default";
+                if (jatos.studySessionData.language){
+                    lang = jatos.studySessionData.language
+                }
+                let message = $('<div>').append(data).find('#end_message').find(`#${lang}`)
+                    $('#message_div').html( message );
+                    document.body.innerHTML = document.body.innerHTML.replace(/ID_STRING/g, jatos.studySessionData["uuid"]);
+
+                }
+            });
+            
+        });
+    </script>
+    
+    
+</body>

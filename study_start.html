@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="javascript/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/jatos.js"></script>
+    <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
+    <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+</head>
+
+<body>
+    <div class= "TaskDescription">
+        
+        <div id="study_description"></div>
+        <button id="continue" type="button" class="btn btn-success">Continue</button>
+    </div>
+</div>
+</div>
+
+<script>
+    var description;
+    
+    jatos.onLoad(function () {
+        
+        //Load the correct description and display it
+        $.ajax({
+            url:"static/html/task_descriptions.html",
+            type:'GET',
+            success: function(data) {
+                
+                let task_type = jatos.studySessionData["task_type"]
+                
+                var lang = "default";
+                if (jatos.studySessionData.language){
+                    lang = jatos.studySessionData.language
+                }
+                
+                mode_strings = {
+                    "default":{
+                        "COLOR":"colors",
+                        "TEXTURE":"visual texture",
+                        "SHAPE":"shapes"
+                    },
+                    "fr":{
+                        "COLOR":"couleurs",
+                        "TEXTURE":"textures visuelles",
+                        "SHAPE":"formes"
+                    }
+                }
+                
+                description_id = "intro";
+                description = $('<div>').append(data).find(`#${description_id}`).find(`#${lang}`);
+                    
+                    $('#study_description').html( description );
+                    $('#study_description').html( function(_, ctx){
+                        return ctx.replace(/MODE_STRING/g, mode_strings[lang][task_type]);
+                    })
+                    $("#continue").click(function(){
+                    jatos.startComponentByPos( jatos.studySessionData.phaseComponentIndex);
+                });
+                }
+            });              
+        });
+    </script>
+</body>
+</html>

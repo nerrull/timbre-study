@@ -12,6 +12,7 @@
     <div >
     <div class="TaskCanvasContainer">
     <h2 class =centered>Choisissez votre language/Choose your language</h2>
+    <br>
     <button class="btn btn-primary centered" id="french_button">Français </button>
     <button class="btn btn-success centered" id="english_button">English</button>    
 
@@ -38,7 +39,11 @@
 
 
         jatos.onLoad(function () {
+            jatos.studySessionData.phaseComponentIndex = 5;
             jatos.studySessionData.taskComponentIndex = 6;
+            jatos.studySessionData.questionnaireComponentIndex =7;
+            jatos.studySessionData.studyStartComponentIndex =9;
+
             $("#english_button").click(function(){
                 setSessionLanguage("default")
                 jatos.startNextComponent();
