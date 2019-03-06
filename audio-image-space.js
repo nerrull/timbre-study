@@ -87,6 +87,12 @@ jsPsych.plugins["audio-image-space"] = (function () {
         pretty_name: 'Number of phases',
         default: 0,
         description: 'Number of phases in the experiment'
+      },
+      language: {
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'language',
+        default: "default",
+        description: 'Number of phases in the experiment'
       }
     }
   }
@@ -127,10 +133,81 @@ jsPsych.plugins["audio-image-space"] = (function () {
     var headerHeight = 50;
 
     //Todo: language
-    var startMessageString = "Press the space bar to begin";
-    var headerMessage = "Find the sound! Press the space bar to replay it.";
-    var progressString = "Progress:";
-    var helpMessageString = "";
+    messages=  {
+      "default":{
+        "startMessageString" : "Press the space bar to begin",
+        "headerMessage" : "Press the space bar to play the target sound",
+        "progressString" : "Progress:",
+        "continue": "Continue",
+        "retry": "Retry",
+        "mouseText": "Place mouse here",
+      },
+      "fr":{
+        "startMessageString" : "Appuyez sur la barre d'espace pour commencer",
+        "headerMessage" : "Appuyez sur la barre d'espace pour écouter le son ciblé",
+        "progressString" : "Progrès:",
+        "continue": "Continuer",
+        "retry": "Réessayer",
+        "mouseText": "Placez votre curseur ici",
+      }
+    };
+    typeStringsEn = {
+      "COLOR": "colors",
+      "SHAPE": "shapes",
+      "TEXTURE": "textures"
+    }
+    typeStringsEnSingular = {
+      "COLOR": "color",
+      "SHAPE": "shape",
+      "TEXTURE": "texture"
+    }
+
+    typeStringsFR = {
+      "COLOR": "couleurs",
+      "SHAPE": "formes",
+      "TEXTURE": "textures"
+    }
+    typeStringsFRSingular = {
+      "COLOR": "couleur",
+      "SHAPE": "form",
+      "TEXTURE": "texture"
+    }
+
+    partTitles = {
+      "default" : ["Practice", "Part 1", "Part 1", "Part 2", "Part 2", "Part 3" ],
+      "fr" : ["Pratique", "Partie 1", "Partie 1", "Partie 2", "Partie 2", "Partie 3" ],
+    }
+    subTitles = {
+      "default" : [
+        "", 
+        "Looking for sounds", "Looking for sounds", 
+        "Associating sounds and "+typeStringsEn[trial.mode], "Associating sounds and "+typeStringsEn[trial.mode],
+        "Finding sounds using "+  typeStringsEnSingular[trial.mode]
+      ],
+      "fr" : [
+        "", 
+        "Recherche de sons", "Recherche de sons", 
+        "Association entre sons et "+typeStringsFR[trial.mode] , "Association entre sons et "+typeStringsEn[trial.mode], 
+        "Recherche de sons à l'aide de la "+  typeStringsFRSingular[trial.mode]
+      ],
+    }
+    subsubTitles = {
+      "default" : ["", "", "Quickly!", "", "Quickly!", "Quickly!"],
+      "fr" : ["", "", "Rapidement!", "", "Rapidement!", "Rapidement!"]
+    }
+
+
+    var startMessageString = messages[trial.language]["startMessageString"];
+    var headerMessage = messages[trial.language]["headerMessage"];
+    var progressString = messages[trial.language]["progressString"];
+    var continueString = messages[trial.language]["continue"];
+    var retryString = messages[trial.language]["retry"];
+    var mouseText=  messages[trial.language]["mouseText"]
+
+    var title=  partTitles[trial.language][trial.phase_index]
+    var subtitle=  subTitles[trial.language][trial.phase_index]
+    var subsubtitle=  subsubTitles[trial.language][trial.phase_index]
+
 
     //Initialize audio elements
     var context = jsPsych.pluginAPI.audioContext();
@@ -145,11 +222,6 @@ jsPsych.plugins["audio-image-space"] = (function () {
       jsPsych.finishTrial(trial_data);
     }
 
-    // //Play the target sound
-    // var playTarget = function () {
-    //   trial_data.listen_count += 1;
-    //   player.playSound(trial.target_index);
-    // }
 
     //Run force directed graph physics sim on points so there's no overlap
     var imSize = trial.image_size;
@@ -194,11 +266,17 @@ jsPsych.plugins["audio-image-space"] = (function () {
       "headerMessage":headerMessage,
       "startMessageString":startMessageString,
       "progressString": progressString,
+      "continueString":continueString,
+      "retryString":retryString,
+      "mouseText":mouseText,
+      "title":title,
+      "subtitle":subtitle,
+      "subsubtitle":subsubtitle,
       "lookup_array": lookup_array,
       "nodeGraph": nodeGraph,
       "end_trial":end_trial,
       "drawDebug":true,
-      "mode":trial.mode,
+      "mode": trial.mode,
     } 
     //init the sketch
     if (trial.mode == "PRACTICE_2"){

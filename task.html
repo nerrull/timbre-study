@@ -60,9 +60,10 @@
             }
 
             else{
-                if (sample.coords[0]>0.9){
-                    sample.coords[0] = 0.9 *sample.coords[0];
-                }
+
+                //Limit coordinates to 0.1-0.9
+                sample.coords[0] = 0.1 + sample.coords[0] *0.8;
+                sample.coords[1] = 0.1 + sample.coords[1] *0.8
                 test_coordinates.push([sample.coords[0], sample.coords[1]])
             }
             test_colors.push([sample.color[0], sample.color[1], sample.color[2]])
@@ -73,6 +74,12 @@
         console.log(test_sounds);
         console.log(test_images);
         console.log(test_coordinates);
+
+        var lang = "default";
+        if (jatos.studySessionData.language){
+            lang = jatos.studySessionData.language
+        }
+
         /* define image space trial */
         var image_space = {
             type:"audio-image-space",
@@ -90,6 +97,7 @@
             phase_index: sess.phase_index,
             num_trials: sess.num_tasks[sess.phase_index],
             num_phases: sess.num_phases,
+            language : lang,
         }
         timeline.push(image_space);
         

@@ -1,46 +1,78 @@
-var drawTexture= function(p, nodeGraph, images, imSize, hover_idx){
+
+
+var drawTexture= function(p, nodeGraph, images, imSize, hover_idx, misclicks){
   for (let idx = 0; idx <  nodeGraph.nodes.length; idx++) {
     let n = nodeGraph.nodes[idx];
     if (hover_idx == idx) {
       p.stroke(0, 255, 0);
       p.fill(0, 255, 0);
       p.ellipse(n.x ,n.y , imSize + 6, imSize + 6)
+      p.fill(150)
+      p.ellipse(n.x ,n.y , imSize, imSize)
+    }
+    p.noStroke()
+    for(var i=0; i<misclicks.length; i++){
+      if(misclicks[i] == idx){
+        p.strokeWeight(2);
+        p.stroke(255,0,0);
+        p.ellipse(n.x , n.y, imSize, imSize)
+      }
     }
     p.image(images[idx], n.x -imSize/2, n.y- imSize/2, imSize, imSize);
+
   }
 }
 
-var drawColor = function(p, colors, nodeGraph, imSize, hover_idx){
+var drawColor = function(p, colors, nodeGraph, imSize, hover_idx, misclicks){
   for (let idx = 0; idx < nodeGraph.nodes.length; idx++) {
     let n = nodeGraph.nodes[idx];
+    p.noStroke()
+
     if (hover_idx == idx) {
-      p.stroke(0, 0, 0);
+      
       p.fill(0, 255, 0);
       p.ellipse(n.x ,n.y , imSize + 6, imSize + 6)
+      p.fill(150)
+      p.ellipse(n.x ,n.y , imSize, imSize)
+
+    }
+
+    for(var i=0; i<misclicks.length; i++){
+      if(misclicks[i] == idx){
+        p.strokeWeight(2);
+        p.stroke(255,0,0);
+      }
     }
     p.fill(colors[idx][0]*255, colors[idx][1]*255, colors[idx][2]*255)
     p.ellipse( n.x, n.y, imSize, imSize);
-    p.stroke(255, 255, 255);
   }
 }
 
-var drawBaseline = function(p, nodeGraph, imSize, hover_idx){
+var drawBaseline = function(p, nodeGraph, imSize, hover_idx, misclicks){
   p.noStroke()
   for (let idx = 0; idx < nodeGraph.nodes.length; idx++) {
     let n = nodeGraph.nodes[idx];
     if (hover_idx == idx) {
       p.fill(0, 255, 0);
       p.ellipse(n.x ,n.y , imSize + 6, imSize + 6)
+      p.fill(150)
+      p.ellipse(n.x ,n.y , imSize, imSize)
     }
-    p.fill(150,170,170)
+
+    p.noStroke()
+    for(var i=0; i<misclicks.length; i++){
+      if(misclicks[i] == idx){
+        p.strokeWeight(2);
+        p.stroke(255,0,0);
+      }
+    }
+    p.fill(125, 125,125);
     p.ellipse( n.x, n.y, imSize, imSize);
   }
 }
 
 var drawEnvelope= function(p,n, contour, color, radius, offset){
-  p.stroke(0, 0, 0);
   p.fill(color);
-  p.stroke(255, 255, 255);
   p.beginShape();
 
   var n_steps = contour.length*2;
@@ -65,7 +97,7 @@ var drawEnvelope= function(p,n, contour, color, radius, offset){
   p.endShape(p.CLOSE);       
 }
 
-var drawShapes = function(p, nodeGraph, envelopes,imSize, hover_idx){
+var drawShapes = function(p, nodeGraph, envelopes,imSize, hover_idx, misclicks){
   for (let idx = 0; idx < nodeGraph.nodes.length; idx++) {
     let n = nodeGraph.nodes[idx];
 
@@ -73,8 +105,16 @@ var drawShapes = function(p, nodeGraph, envelopes,imSize, hover_idx){
       p.fill(0,255,0)
       p.ellipse(n.x, n.y,imSize,imSize)
     }
+    let color = p.color(15, 200,200,255)
 
-    drawEnvelope(p,n, envelopes[idx], p.color(15, 200,200,255), imSize/2, 0.5)    
+    p.noStroke()
+    for(var i=0; i<misclicks.length; i++){
+      if(misclicks[i] == idx){
+        p.strokeWeight(1);
+        p.stroke(255,0,0);
+      }
+    }
+    drawEnvelope(p,n, envelopes[idx], color, imSize/2, 0.5)    
   }
 }
 
@@ -98,6 +138,12 @@ var get_sketch= function(params) {
         var headerMessage = params.headerMessage
         var startMessageString =params.startMessageString
         var progressString = params.progressString
+        var continueString =params.continueString
+        var retryString =params.retryString
+        var mouseText = params.mouseText
+        var title= params.title
+        var subtitle = params.subtitle
+        var subsubtitle=  params.subsubtitle
         var lookup_array = params.lookup_array
         var nodeGraph = params.nodeGraph
         var end_trial = params.end_trial
@@ -136,11 +182,14 @@ var get_sketch= function(params) {
             for (let idx = 0; idx < images.length; idx++) {
               p.apply_mask(images[idx], mask);
             }
+            mask.remove();
             //console.log(trial.images[idx]);
           }
           p.textSize(32);
           p.frameRate(30);
-          player.playSound(trial.target_index);
+
+
+          // player.playSound(trial.target_index);
         };
     
         p.draw = function () {
@@ -148,6 +197,8 @@ var get_sketch= function(params) {
             let m = "Correct!"
             p.background(150);
             p.push();
+            p.textSize(32);
+
             p.translate(p.width / 2, p.height / 2);
             p.fill(30);
             let text_width = p.textWidth(m);
@@ -160,7 +211,7 @@ var get_sketch= function(params) {
               p.stroke(255);
               p.push()
               p.translate(retry_pos.x,retry_pos.y);
-              m = "Retry"
+              m = retryString
               text_width = p.textWidth(m);
               retry_radius = text_width/2+20;
               p.fill(0,170, 170);
@@ -171,7 +222,7 @@ var get_sketch= function(params) {
 
               p.push()
               p.translate(continue_pos.x, continue_pos.y);
-              m = "Continue"
+              m = continueString
               text_width = p.textWidth(m);
               continue_radius = text_width/2 +20;
               p.fill(0,170, 0);
@@ -183,28 +234,43 @@ var get_sketch= function(params) {
             }
             return;
           }
+
           //Draw start screen
           if (!started) {
             p.background(150);
             p.push();
+
+            p.fill(255);
+            p.textSize(32);
+            p.translate(p.width / 2 , p.height /2 -250);
+            let progress_text = title;
+            let text_width = p.textWidth(progress_text);
+            p.text(progress_text, -text_width / 2, 60);
+            p.textSize(24);
+
+            p.translate(0, 60);
+            progress_text = subtitle;
+            text_width = p.textWidth(progress_text);
+            p.text(progress_text, -text_width / 2, 60);
+            p.textSize(32);
+
+            p.translate(0, 60);
+            progress_text = subsubtitle;
+            text_width = p.textWidth(progress_text);
+            p.text(progress_text, -text_width / 2, 60);
+
+            p.pop()
+            p.push()
             p.translate(p.width / 2, p.height / 2);
+            
             p.fill(30);
-            let text_width = p.textWidth(startMessageString);
+            text_width = p.textWidth(startMessageString);
             p.rect(-text_width / 2 - 10, -40, text_width + 20, 60);
             p.fill(255);
             p.text(startMessageString, -text_width / 2, 0);
 
-            let pi = trial.phase_index
-            let progress_text = "Phase " + pi + "/" + (trial.num_phases-1);
-            if (mode == "PRACTICE"){
-              progress_text = "Practice"
-            }
-            text_width = p.textWidth(progress_text);
-            // p.text(progress_text, -text_width / 2, 60);
-
             let ti = trial.task_index+1
-
-            progress_text = "Task " + ti + "/" +trial.num_trials;
+            progress_text =  ti + "/" +trial.num_trials;
             text_width = p.textWidth(progress_text);
             p.text(progress_text, -text_width / 2, 100);
 
@@ -213,7 +279,7 @@ var get_sketch= function(params) {
             p.fill(128, 0, 0);
             p.rect(0, 0, 50, 50);
             p.fill(255);
-            p.text("<---- Place mouse here", 52, 30);
+            p.text("<---- " + mouseText, 52, 30);
             return;
           }
     
@@ -221,27 +287,29 @@ var get_sketch= function(params) {
           p.background(240);
           p.drawHeader();
           //debugger;
+          p.push();
+
+          console.log(trial_data.misclicks)
           if (mode == "TEXTURE"){
-            drawTexture(p, nodeGraph,images, imSize, hover_idx);
+            drawTexture(p, nodeGraph,images, imSize, hover_idx, trial_data.misclicks);
           }
           else if (mode == "COLOR"){
-            drawColor(p, trial.colors, nodeGraph,imSize, hover_idx)
+            drawColor(p, trial.colors, nodeGraph,imSize, hover_idx,  trial_data.misclicks)
           }
           else if (mode == "SHAPE"){
-            drawShapes(p, nodeGraph,envelopes,imSize, hover_idx)
+            drawShapes(p, nodeGraph,envelopes,imSize, hover_idx,  trial_data.misclicks)
           }
           else if (mode == "BASELINE"){
-            drawBaseline(p, nodeGraph, imSize, hover_idx)
+            drawBaseline(p, nodeGraph, imSize, hover_idx,  trial_data.misclicks)
           }
           else if (mode == "PRACTICE"){
-            drawBaseline(p, nodeGraph, imSize, hover_idx)
+            drawBaseline(p, nodeGraph, imSize, hover_idx, trial_data.misclicks)
             return;
           }
+          p.pop();
 
           if (p.frameCount % 5 == 0) {
-            var mouseX = Math.floor(p.mouseX);
-            var mouseY = Math.floor(p.mouseY);
-            trial_data.mousePosition.push([mouseX, mouseY]);
+            trial_data.mousePosition.push([Math.floor(p.mouseX),Math.floor(p.mouseY)]);
           }
         };
     
@@ -251,7 +319,7 @@ var get_sketch= function(params) {
           var header_content_offset = 30;
     
           p.push();
-          p.textSize(24);
+          p.textSize(18);
           p.noStroke();
     
           p.fill(255);
@@ -259,15 +327,20 @@ var get_sketch= function(params) {
           p.fill(0);
           p.text(headerMessage, 3, header_content_offset);
           // p.rect(0,headerHeight-3, p.width,3); 
-          
+          p.pop()
+
+          p.push()
+          p.fill(0);
+          p.textSize(18);
+
           //Draw progress
           if (mode== "PRACTICE"){
-            p.translate(p.width -  (progress_width + 10), 0);
-            p.text("Practice mode", -40,header_content_offset)
-            p.pop();
+            // p.translate(p.width -  (progress_width + 10), 0);
+            // p.text("Practice mode", -40,header_content_offset)
+            // p.pop();
             return
           }
-
+          debugger
           var progress_string_width = p.textWidth(progressString);
           p.translate(p.width -  (progress_width + 10), 0);
           p.text(progressString, -progress_string_width - 5, header_content_offset);
@@ -320,8 +393,8 @@ var get_sketch= function(params) {
         };
     
         p.mouseMoved = function () {
-          var mouseX = Math.floor(p.mouseX);
-          var mouseY = Math.floor(p.mouseY);
+          let mouseX = Math.floor(p.mouseX);
+          let mouseY = Math.floor(p.mouseY);
           if (ended){
             return;
           }
@@ -332,14 +405,13 @@ var get_sketch= function(params) {
           if (mouseX >= p.width || mouseY >= p.height ||mouseX<0 ||mouseY<0) {
             return;
           }
-          let image_index = lookup_array[mouseX][mouseY];
-          hover_idx = image_index;
-          if (image_index != -1) {
-            if (lastMouseIndex != image_index) {
-              player.playSound(image_index);
+          hover_idx = lookup_array[mouseX][mouseY];
+          if (hover_idx != -1) {
+            if (lastMouseIndex != hover_idx) {
+              player.playSound(hover_idx);
             }
           }
-          lastMouseIndex = image_index;
+          lastMouseIndex = hover_idx;
         };
     
         p.keyPressed = function () {
@@ -357,11 +429,10 @@ var get_sketch= function(params) {
             }
             return false;
           }
-          trial_data.listen_count += 1;
-          player.playSound(trial.target_index);
           // Spacebar
-          if (p.keyCode == 49) {
-    
+          if (p.key == ' ') {
+            trial_data.listen_count += 1;
+            player.playSound(trial.target_index);
           }
           return false;
         }
@@ -553,16 +624,15 @@ var get_highlight_sketch= function(params) {
         if (mouseX >= p.width || mouseY >= p.height ||mouseX<0 ||mouseY<0) {
           return;
         }
-        let image_index = lookup_array[mouseX][mouseY];
-        hover_idx = image_index;
-        if (image_index != -1) {
-          if (lastMouseIndex != image_index) {
-            player.playSound(image_index);
-            highlighted[image_index]= true;
+        hover_idx = lookup_array[mouseX][mouseY];
+        if (hover_idx != -1) {
+          if (lastMouseIndex != hover_idx) {
+            player.playSound(hover_idx);
+            highlighted[hover_idx]= true;
             
           }
         }
-        lastMouseIndex = image_index;
+        lastMouseIndex = hover_idx;
       };
   
       p.keyPressed = function () {

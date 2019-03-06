@@ -34,6 +34,9 @@
             if (jatos.studySessionData.language){
                 lang = jatos.studySessionData.language
             }
+            if (lang=="fr"){
+                $("#continue").text("Continuer");
+            }
 
              //Load the correct description and display it
              $.ajax({
@@ -90,7 +93,6 @@
 
                         $('#description_div').html( description );
 
-
                         mode_strings = {
                             "default":{
                                 "COLOR":"colors",
@@ -115,7 +117,7 @@
 
                 });
             
-                });
+                }); 
         </script>
     </body>
 </html>
