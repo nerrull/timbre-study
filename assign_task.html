@@ -13,7 +13,7 @@
 <body>
     <div class= "TaskDescription">
         <div id="description_div"></div>
-        <button id="continue" type="button" class="btn btn-success">Continue</button>
+        <div id="next_button">...Loading study data</div>
         </div>
         </div>
     </div>
@@ -121,6 +121,12 @@
             if (jatos.studySessionData.language){
                 lang = jatos.studySessionData.language
             }
+
+            let loading_string = "...Loading study data"
+            if (lang =="fr"){
+                loading_string = "...Chargement des données de l'étude"
+            }
+            $("#next_button").html(loading_string);
             //Load the correct description and display it
             $.ajax({
                     url:"static/html/task_descriptions.html",
@@ -147,7 +153,10 @@
 
                 jatos.studySessionData["uuid"] = uuid4();
                 console.log("Participant UUID: "+jatos.studySessionData["uuid"])
+                let continueString ="Continue" 
+                if (lang =="fr") {continueString= "Continuer"};
 
+                $("#next_button").html(`<button id="continue" type="button" class="btn btn-success">${continueString}</button>`)
                 $("#continue").click(function(){
                     sessionStorage.removeItem("sample_data");
                     jatos.submitResultData(JSON.stringify(jatos.studySessionData));
