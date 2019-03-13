@@ -90,3 +90,15 @@ br {
 h4{
     line-height: 1.5em; 
 }
+
+table {
+    border-collapse: collapse;
+    border: 2px black solid;
+    font: 12px sans-serif;
+    padding: 10px;
+}
+
+td {
+    border: 1px black solid;
+    padding: 10px;
+}

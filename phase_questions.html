@@ -52,20 +52,32 @@
                         "SHAPE":"forme"
                     }
                 }
-
+            placement_strings = {
+                    "default":{
+                        "COLOR":"circles",
+                        "TEXTURE":"circles",
+                        "SHAPE":"shapes"
+                    },
+                    "fr":{
+                        "COLOR":"cercles",
+                        "TEXTURE":"cercles",
+                        "SHAPE":"formes"
+                    }
+                }
             let vis_string = mode_strings[lang][jatos.studySessionData.task_type]
-            
+            let placement_string = placement_strings[lang][jatos.studySessionData.task_type]
             Survey.Survey.cssType = "bootstrap";
             Survey.defaultBootstrapCss.navigationButton = "btn btn-green";
             var surveyJSON;
             if(jatos.studySessionData.phase_index ==5){
                 var surveyJSON = {pages:[{name:"page1",elements:[{type:"panel",name:"panel1",elements:[{type:"rating",name:"difficulty",title:{default:"How would you rate the degree of difficulty of the tasks?",fr:"Quel était le degré de difficulté des tâches?"},isRequired:true,rateValues:[1,2,3,4,5],minRateDescription:{default:"Very easy",fr:"Très facile"},maxRateDescription:{default:"Very difficult",fr:"Très difficile"}},{type:"rating",name:"visual_help",
-                title:{default:`Did you the ${vis_string} help you find the target sound?`,
+                title:{default:`Did the ${vis_string} help you find the target sound?`,
                 fr:`À quel point la ${vis_string} des éléments vous a aidé dans votre recherche?`},
                 isRequired:true,minRateDescription:{default:"Not at all",fr:"Pas du tout"},
                 maxRateDescription:{default:"Very much",fr:"Beaucoup"}},
-                {type:"rating",name:"space_help",title:{default:"Did the placement of the circles help you find the target sound?",
-                fr:"À quel point l'emplacement des éléments (gauche/droite, haut/bas) vous a aidé dans votre recherche?"},
+                {type:"rating",name:"space_help",
+                title:{default:`Did the location of ${placement_string} help you find the target sound?`,
+                fr:`Est-ce que l'emplacement des ${placement_string} (gauche/droite, haut/bas) vous a aidé dans votre recherche?`},
                 isRequired:true,minRateDescription:{fr:"Pas du tout",default:"Not at all"},
                 maxRateDescription:{default:"Very much",fr:"Beaucoup"}},{type:"rating",name:"spatial_coherence",title:{default:"Did you find that similar sounds were closer together and different sounds were farther apart?",fr:"Trouvez-vous que les sons similaires étaient plus rapprochés et que les sons différents étaient plus éloignés?\n"},isRequired:true,minRateDescription:{default:"Not at all",fr:"Pas du tout"},maxRateDescription:{default:"All of the time",fr:"Toujours"}},{type:"rating",name:"visual_coherence",
                 title:{default:`Did you find that similar sounds had similar ${vis_string} and different sounds looked different?`,

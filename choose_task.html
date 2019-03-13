@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="javascript/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/jatos.js"></script>
+    <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
+    <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+    <script src="utils/uuid.js"></script>
+    
+</head>
+
+<body>
+    <div class= "TaskDescription">
+        <div id="CHOOSE"></div>
+    <div></div>
+    <button id="TEXTURE" type="button" class="btn btn-success"></button>
+    <button id="COLOR" type="button" class="btn btn-success"></button>
+    <button id="SHAPE" type="button" class="btn btn-success"></button>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+    
+    function sessionSuccess(){
+        console.log("Succesfully sent session data");
+        console.log(jatos.studySessionData);
+    }
+    
+    function sessionFailure(){
+        console.log("Failed to send session data");
+    }
+    
+    jatos.onLoad(function () {
+
+        jatos.studySessionData.phaseComponentIndex = 6;
+        jatos.studySessionData.taskComponentIndex = 7;
+        jatos.studySessionData.questionnaireComponentIndex =8;
+        jatos.studySessionData.studyStartComponentIndex =10;
+        
+        var lang = "default";
+        
+        if (jatos.studySessionData.language){
+            lang = jatos.studySessionData.language
+        }
+        
+        choose_strings = {
+            "default": "<h2>Choose your visualisation type</h2>",
+            "fr": "<h2>Choisissez la sorte de visualisation</h2>"
+        }
+
+        button_strings = {
+            "default": {
+                "COLOR":"Color",
+                "TEXTURE":"Texture",
+                "SHAPE":"Shape",
+                
+            },
+            "fr": {
+                "COLOR":"Couleur",
+                "TEXTURE":"Texture",
+                "SHAPE":"Forme",
+                
+            },            
+        }
+        $('#CHOOSE').html( choose_strings[lang] );
+        $("#TEXTURE").html(button_strings[lang]["TEXTURE"])
+        $("#COLOR").html(button_strings[lang]["COLOR"])
+        $("#SHAPE").html(button_strings[lang]["SHAPE"])
+
+        $("#TEXTURE").click(function(){
+            jatos.studySessionData["task_type"] = "TEXTURE";
+            jatos.submitResultData(JSON.stringify(jatos.studySessionData));
+            jatos.startNextComponent()
+        });
+        
+        $("#COLOR").click(function(){
+            jatos.studySessionData["task_type"] = "COLOR";
+            jatos.submitResultData(JSON.stringify(jatos.studySessionData));
+            jatos.startNextComponent()
+        });
+        
+        $("#SHAPE").click(function(){
+            jatos.studySessionData["task_type"] = "SHAPE";
+            jatos.submitResultData(JSON.stringify(jatos.studySessionData));
+            jatos.startNextComponent()
+        });               
+    });
+</script>
+</body>
+</html>

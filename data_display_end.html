@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html>
+
+<script src="javascript/jquery-3.1.1.min.js"></script>
+<script src="/assets/javascripts/jatos.js"></script>
+<script src="lib/papaparse.min.js"></script>
+<script src="lib/d3.min.js"></script>
+<script src="filesaver/FileSaver.js"></script>
+
+<link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
+<link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    
+</body>
+<div class=FormBox>
+    <div id="message_div"></div>
+    <div id="data_div">
+        <h3> Résultats</h3>
+    </div>
+    
+    <br>
+    <button id="db" type="button" class="btn">Télécharger</button>
+    <button id="download_button_full" type="button" class="btn">Télécharger résultats détaillés</button>
+    
+</div>
+<script>
+
+    function median(values){
+        values.sort(function(a,b){
+            return a-b;
+        });
+        
+        if(values.length ===0) return 0
+        
+        var half = Math.floor(values.length / 2);
+        
+        if (values.length % 2)
+        return values[half];
+        else
+        return (values[half - 1] + values[half]) / 2.0;
+    }
+    
+    
+    function displayCSV(data){
+        var parsedCSV = d3.csvParseRows(data);
+        var container = d3.select("#data_div")
+        .append("table")
+        
+        .selectAll("tr")
+        .data(parsedCSV).enter()
+        .append("tr")
+        
+        .selectAll("td")
+        .data(function(d) { return d; }).enter()
+        .append("td")
+        .text(function(d) { return d; });
+    } 
+    
+    jatos.onLoad(function () {
+        var lang = "default";
+        if (jatos.studySessionData.language){
+            lang = jatos.studySessionData.language;
+        }
+        results = jatos.studySessionData.results;
+        formatted_data = {
+            "fields" : ["Partie", "Numero de tache", "Temps (s)", "# Erreurs", "# Ecoutes"],
+            "data" :[]
+        }
+        
+        formatted_time_data = {
+            "fields" : ["Partie", "Meilleur temps (ms)", "Pire temps (ms)", "Temps moyen (ms)", "Temps mediane(ms)", "# Erreurs", "# Ecoutes"],
+            "data" :[]
+        }
+        phase_names = {
+            1:"Partie 1a",
+            2:"Partie 1b",
+            3:"Partie 2a",
+            4:"Partie 2b",
+            5:"Partie 3",
+        }
+        
+        //Get data skipping training session
+        for( let phase_index = 1;phase_index<Object.keys(results).length;phase_index++){
+            phase_data = results[phase_index];
+            var times = []
+            var errors = 0;
+            var listens = 0;
+            for(let task_index =0 ;task_index<Object.keys(phase_data).length;task_index++){
+                task_data = phase_data[task_index];
+                formatted_data["data"].push( [phase_names[phase_index], task_index, task_data["time"], task_data["misclicks"],  task_data["listens"]]);
+                times.push(task_data["time"]);
+                errors += task_data["misclicks"];
+                listens +=  task_data["listens"];
+            }
+            
+            bestTime = Math.min(...times);
+            worstTime = Math.max(...times);
+            averageTime = times.reduce((a,b) => a + b, 0)/times.length;
+            medTime = median(times)
+            formatted_time_data["data"].push([phase_names[phase_index], bestTime, worstTime, averageTime, medTime, errors,listens])
+        }
+        
+        console.log(formatted_data);
+        data_csv = Papa.unparse(formatted_data);
+        time_csv = Papa.unparse(formatted_time_data);
+        displayCSV(time_csv);
+        // l = createDownloadableCsvFile("donnees_etude.csv", time_csv)
+        // l2 = createDownloadableCsvFile("donnees_etude_completes.csv", data_csv)
+        data_csv_blob = new Blob([data_csv], { type: "text/csv;charset=utf-8" });
+        time_csv_blob = new Blob([time_csv], { type: "text/csv;charset=utf-8" });
+        
+        
+        $.ajax({
+            url:"static/html/task_descriptions.html",
+            type:'GET',
+            success: function(data) {
+                
+                let message = $('<div>').append(data).find('#end_message_students').find(`#${lang}`)
+                    $('#message_div').html( message );
+                    document.body.innerHTML = document.body.innerHTML.replace(/ID_STRING/g, jatos.studySessionData["uuid"]);
+                    
+                    $("#db").click(function(){
+                        // debugger;
+                        saveAs(time_csv_blob, "donnees_etude.csv");
+                        // l = createDownloadableCsvFile("donnees_etude.csv", time_csv)
+                        console.log("Download")
+                    });
+                    
+                    $("#download_button_full").click(function(){
+                        console.log("Download 2")
+                        saveAs(data_csv_blob, "donnees_etude_completes.csv");
+                    });
+                    
+                }
+            });
+            
+        });
+    </script>
+    
+    
+</body>

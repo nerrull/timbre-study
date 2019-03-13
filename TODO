@@ -1,28 +1,17 @@
-Ask user to go fullscreen
 
 Extra questions for sound workers not showing up
 
 Make circles smaller
 
-Fix audio calibration page
 
 Add abort button
 
-Move questionnaire in between phases
+
 
 Class:
 	Each student does the study and receives their performance vs the group performance
 	How can the students use this information to improve their perception
 
-Processing filterbank - me
-	Timbre agréable
-	Missing pitch (harmonic suppresion)
-	Pitch masking?
-
-Modulation en fréquence/amplitude -me
-
-
-Acceleromètre
 
 
 Refresh page?
@@ -88,13 +77,13 @@ Reduce range of positions (0.1 -0.9)
 Scale space based on browser
 
 See how many times people repeat practice task
-Give them uuid at end of study -check
+Give them uuid at end of study
 
 
 Jean comments:
 	locate//localiser (on the screen)
 	écouter / reecouter
-	gmake them play the sound themselves
+	make them play the sound themselves
 	remove ressemblaient pas
 
 	cross out missed elements

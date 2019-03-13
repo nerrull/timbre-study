@@ -108,9 +108,20 @@
                 var resultJson = jsPsych.data.get().json();
 /*                 console.log ("Results:\n" +resultJson)
                 console.log("Incrementing task index") */
-                jatos.studySessionData.task_index += 1;
                 //console.log("Task index:" + jatos.studySessionData.task_index)
                 //Increment phase index
+                results= JSON.parse(resultJson)[0]
+                time = results["elapsed_time"];
+                misclick = results["num_misclicks"];
+                listens = results["listen_count"];
+
+                jatos.studySessionData.results[jatos.studySessionData.phase_index][jatos.studySessionData.task_index] =
+                    {
+                        "time": time,
+                        "misclicks": misclick,
+                        "listens": listens
+                    };                
+                jatos.studySessionData.task_index += 1;
                 if (jatos.studySessionData.task_index >= jatos.studySessionData.num_tasks[jatos.studySessionData.phase_index]){
                     jatos.studySessionData.phase_index +=1;
                     jatos.studySessionData.task_index = 0;

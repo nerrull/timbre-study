@@ -51,7 +51,7 @@
 
 
             var nSamplesPerTask = [10,30,30,30,30,30];
-            // var nSamplesPerTask = [1,1,1,1,1,1];
+            // var nSamplesPerTask = [2,2,2,2,2,2];
 
 
             var totalSamples = nTasks.map((v, i) => nSamplesPerTask[i]*v).reduce((pv, v) => pv+v)
@@ -75,12 +75,13 @@
             var task_modes = ["PRACTICE","BASELINE", "BASELINE", ...[...Array(3)].map((_,i)=>mode)]
             jatos.studySessionData["task_modes"] = task_modes;
             jatos.studySessionData["num_phases"] = nPhases;
-            
+            results = {}
 
             sampleIndex =0;
             // Generate sample sets for tasks
             for (var p =0; p<nPhases; p++){
                 taskDict[p]={};
+                results[p]={};
                 
                 for (var t =0; t<nTasks[p]; t++){
                     var sampleList =[];
@@ -91,10 +92,13 @@
                         sampleIndex ++;
                     }
                     taskDict[p][t]= sampleList;
+                    results[p][t]={};
+
                 } 
             } 
             console.log(samples)
             console.log(taskDict)
+            jatos.studySessionData["results"] = results;
 
             return [taskDict, samples];
         }
@@ -109,15 +113,16 @@
         }
         
         jatos.onLoad(function () {
-            jatos.studySessionData["task_type"] = getRandomTaskID();
+            if (jatos.studySessionData["task_type"] ==null){
+                jatos.studySessionData["task_type"] = getRandomTaskID();
+            }
             var lang = "default";
 
             if (jatos.studySessionData.language){
                 lang = jatos.studySessionData.language
             }
-
-             //Load the correct description and display it
-             $.ajax({
+            //Load the correct description and display it
+            $.ajax({
                     url:"static/html/task_descriptions.html",
                     type:'GET',
                     success: function(data) {
@@ -129,7 +134,7 @@
                         // console.log(description)
                         // console.log(title)
                         $('#description_div').html( description );
-                        }
+                    }
                 });
 
             var json= $.getJSON("static/data/study_data.json", function(studyData){         
@@ -142,12 +147,7 @@
 
                 jatos.studySessionData["uuid"] = uuid4();
                 console.log("Participant UUID: "+jatos.studySessionData["uuid"])
-                calibration_samples = [];
-                for(var i =0; i<studyData["calibration_sample_indexes"].length;i++){
-                    let si = studyData["calibration_sample_indexes"][i];
-                    calibration_samples.push(studyData.samples[si]); 
-                }
-                jatos.studySessionData["calibration_samples"] = calibration_samples;
+
                 $("#continue").click(function(){
                     sessionStorage.removeItem("sample_data");
                     jatos.submitResultData(JSON.stringify(jatos.studySessionData));

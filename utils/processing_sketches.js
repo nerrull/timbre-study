@@ -340,7 +340,7 @@ var get_sketch= function(params) {
             // p.pop();
             return
           }
-          debugger
+          // debugger
           var progress_string_width = p.textWidth(progressString);
           p.translate(p.width -  (progress_width + 10), 0);
           p.text(progressString, -progress_string_width - 5, header_content_offset);

@@ -32,7 +32,6 @@
         }
         //Play a sound specified by index
         playSound(index) {
-
             //If a different sound was already playing reset it
             if (this.playingIndex != -1) {
                 console.log(`Trying to kill ${this.playingIndex}`)
