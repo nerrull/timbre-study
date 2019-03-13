@@ -6,6 +6,8 @@
             this.playingIndex = -1;
             this.context =context;
             this.sounds = sounds;
+            this.gain = context.createGain();
+            this.gain.connect(context.destination);
 /* 
             for (let idx = 0; idx < sounds.length; idx++) {
                 console.log(this.sounds[idx]);
@@ -41,7 +43,7 @@
             //Regenerate the sound source because they're automatically deleted after playing
             this.soundBuffers[index] = this.context.createBufferSource();
             this.soundBuffers[index].buffer = jsPsych.pluginAPI.getAudioBuffer(this.sounds[index]);
-            this.soundBuffers[index].connect(this.context.destination);
+            this.soundBuffers[index].connect(this.gain);
             this.soundBuffers[index].onended = function () {
                 // console.log(`Sound ${index}  ended itself`)
                 // console.log(this)
@@ -57,6 +59,10 @@
 /*             for (let idx = 0; idx < this.soundBuffers.length; idx++) {
               this.soundBuffers[idx].onended = function () { };
             } */
+        }
+
+        setGain(value){
+            this.gain.gain.setValueAtTime(value, this.context.currentTime);
         }
 }
 

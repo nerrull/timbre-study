@@ -93,6 +93,12 @@ jsPsych.plugins["audio-image-space"] = (function () {
         pretty_name: 'language',
         default: "default",
         description: 'Number of phases in the experiment'
+      },
+      volume: {
+        type: jsPsych.plugins.parameterType.FLOAT,
+        pretty_name: 'volume',
+        default: 1.,
+        description: 'Audio playback volume'
       }
     }
   }
@@ -118,6 +124,7 @@ jsPsych.plugins["audio-image-space"] = (function () {
       end_time: -1,
       listen_count: 0,
       mode: trial.mode,
+      volume: trial.volume
     };
 
     //Add a canvas_id div to the display element for p5 to draw to
@@ -212,6 +219,7 @@ jsPsych.plugins["audio-image-space"] = (function () {
     //Initialize audio elements
     var context = jsPsych.pluginAPI.audioContext();
     var player = new SamplePlayer(context, trial.sounds);
+    player.setGain(trial.volume);
 
     // End the trial and save the data
     var end_trial = function (trial_data) {
@@ -277,6 +285,7 @@ jsPsych.plugins["audio-image-space"] = (function () {
       "end_trial":end_trial,
       "drawDebug":true,
       "mode": trial.mode,
+      
     } 
     //init the sketch
     if (trial.mode == "PRACTICE_2"){

@@ -1,7 +1,9 @@
 
 
 var drawTexture= function(p, nodeGraph, images, imSize, hover_idx, misclicks){
+  p.noStroke();
   for (let idx = 0; idx <  nodeGraph.nodes.length; idx++) {
+    p.push();
     let n = nodeGraph.nodes[idx];
     if (hover_idx == idx) {
       p.stroke(0, 255, 0);
@@ -19,12 +21,14 @@ var drawTexture= function(p, nodeGraph, images, imSize, hover_idx, misclicks){
       }
     }
     p.image(images[idx], n.x -imSize/2, n.y- imSize/2, imSize, imSize);
-
+    p.pop()
   }
 }
 
 var drawColor = function(p, colors, nodeGraph, imSize, hover_idx, misclicks){
   for (let idx = 0; idx < nodeGraph.nodes.length; idx++) {
+    p.push();
+
     let n = nodeGraph.nodes[idx];
     p.noStroke()
 
@@ -45,12 +49,15 @@ var drawColor = function(p, colors, nodeGraph, imSize, hover_idx, misclicks){
     }
     p.fill(colors[idx][0]*255, colors[idx][1]*255, colors[idx][2]*255)
     p.ellipse( n.x, n.y, imSize, imSize);
+    p.pop();
   }
 }
 
 var drawBaseline = function(p, nodeGraph, imSize, hover_idx, misclicks){
+  // console.log(misclicks)
   p.noStroke()
   for (let idx = 0; idx < nodeGraph.nodes.length; idx++) {
+    p.push();
     let n = nodeGraph.nodes[idx];
     if (hover_idx == idx) {
       p.fill(0, 255, 0);
@@ -68,6 +75,7 @@ var drawBaseline = function(p, nodeGraph, imSize, hover_idx, misclicks){
     }
     p.fill(125, 125,125);
     p.ellipse( n.x, n.y, imSize, imSize);
+    p.pop();
   }
 }
 
@@ -153,6 +161,10 @@ var get_sketch= function(params) {
         var retry_pos, retry_radius;
         var continue_pos, continue_radius;
 
+        var volume_verts =[];
+        var volume_left = 0;
+        var volume_width = 1.;
+
         if (mode == "TEXTURE"){
           p.preload = function () {
             for (let idx = 0; idx < trial.images.length; idx++) {
@@ -170,7 +182,6 @@ var get_sketch= function(params) {
           retry_radius =1;
           continue_pos=p.createVector(3*p.width/4, p.height *0.7)
           continue_radius= 1;
-
 
           //Load images
           console.log(trial.images.length);
@@ -289,7 +300,7 @@ var get_sketch= function(params) {
           //debugger;
           p.push();
 
-          console.log(trial_data.misclicks)
+          // console.log(trial_data.misclicks)
           if (mode == "TEXTURE"){
             drawTexture(p, nodeGraph,images, imSize, hover_idx, trial_data.misclicks);
           }
@@ -332,30 +343,95 @@ var get_sketch= function(params) {
           p.push()
           p.fill(0);
           p.textSize(18);
+          
+          let volume_offset = 45
+          let volume_string = "Volume :"
+          var progress_string_width = p.textWidth(volume_string);
 
+          let left = p.width -  (progress_width + 10);
+          let top = volume_offset - progress_height-5;
+          volume_left = left;
+          volume_width = progress_width;
+          //Draw volume
+          if (volume_verts.length<4){
+            volume_verts.push(p.createVector(left, top));
+            volume_verts.push(p.createVector(left, top+progress_height+15));
+            volume_verts.push(p.createVector(left+progress_width, top));
+            volume_verts.push(p.createVector(left+progress_width, top+progress_height+15));
+          }
+
+          p.push()
+          p.translate(p.width -  (progress_width + 10), 0);
+          p.text(volume_string, -progress_string_width - 5, volume_offset);
+          p.fill(0, 200, 10);
+          p.rect(0, volume_offset - progress_height, (progress_width * trial_data.volume), progress_height);
+          p.stroke(180);
+          p.strokeWeight(1);
+          p.noFill();
+          p.rect(0, volume_offset - progress_height, progress_width, progress_height);
+          p.pop()
           //Draw progress
           if (mode== "PRACTICE"){
-            // p.translate(p.width -  (progress_width + 10), 0);
-            // p.text("Practice mode", -40,header_content_offset)
-            // p.pop();
             return
           }
-          // debugger
-          var progress_string_width = p.textWidth(progressString);
+          p.push();
+          let progress_offset = 20
+
+          progress_string_width = p.textWidth(progressString);
           p.translate(p.width -  (progress_width + 10), 0);
-          p.text(progressString, -progress_string_width - 5, header_content_offset);
+          p.text(progressString, -progress_string_width - 5, progress_offset);
           p.fill(0, 50, 100);
-          p.rect(0, header_content_offset - progress_height, (progress_width * trial.task_index) / trial.num_trials, progress_height);
-          p.stroke(120);
-          p.strokeWeight(3);
+          p.rect(0, progress_offset - progress_height, (progress_width * trial.task_index) / trial.num_trials, progress_height);
+          p.stroke(180);
+          p.strokeWeight(2);
           p.noFill();
-          p.rect(0, header_content_offset - progress_height, progress_width, progress_height);
+          p.rect(0, progress_offset - progress_height, progress_width, progress_height);  
           p.pop();
         }
-    
+
+        p.isInVolumeControl= function(px, py){
+          num = 4;
+          i = num - 1;
+          j = num - 1;
+          oddNodes = false;
+          for (i = 0; i < num; i++) {
+            let vi = volume_verts[i];
+            let vj = volume_verts[j];
+            if (vi.y < py && vj.y >= py || vj.y < py && vi.y >= py) {
+              if (vi.x + (py - vi.y) / (vj.y - vi.y) * (vj.x - vi.x) < px) {
+                oddNodes = !oddNodes;
+              }
+            }
+            j = i;
+          }
+          return oddNodes;
+        }
+        
+        p.mouseDragged = function () {
+          var mouseX = Math.floor(p.mouseX);
+          var mouseY = Math.floor(p.mouseY);
+
+          if (mouseY < headerHeight){
+            if (p.isInVolumeControl(mouseX,mouseY)){
+              v = (mouseX - volume_left)/volume_width;
+              console.log(v);
+              p.setVolume(v)
+
+            }
+          }
+        }
         p.mousePressed = function () {
           var mouseX = Math.floor(p.mouseX);
           var mouseY = Math.floor(p.mouseY);
+
+          if (mouseY < headerHeight){
+            if (p.isInVolumeControl(mouseX,mouseY)){
+              v = (mouseX - volume_left)/volume_width;
+              console.log(v);
+              p.setVolume(v)
+
+            }
+          }
     
           if (!started||ended) {
             if(ended && mode =="PRACTICE"){
@@ -413,6 +489,12 @@ var get_sketch= function(params) {
           }
           lastMouseIndex = hover_idx;
         };
+
+        p.setVolume =function(value){
+          value = p.max(0.1,p.min(1., value));
+          trial_data.volume = value;
+          player.setGain(value)
+        }
     
         p.keyPressed = function () {
           if (ended){
@@ -469,9 +551,9 @@ var get_highlight_sketch= function(params) {
 
       p.setup = function () {
         p.createCanvas(trial.dims[0] + imSize, headerHeight + trial.dims[1] + imSize);
-        retry_pos =p.createVector(p.width/4, p.height *0.7)
+        retry_pos = p.createVector(p.width/4, p.height *0.7)
         retry_radius =1;
-        continue_pos=p.createVector(3*p.width/4, p.height *0.7)
+        continue_pos= p.createVector(3*p.width/4, p.height *0.7)
         continue_radius= 1;
 
 
@@ -575,7 +657,7 @@ var get_highlight_sketch= function(params) {
       p.drawHeader = function () {
         var progress_width = 150;
         var progress_height = 15;
-        var header_content_offset = 30;
+        var header_content_offset = 20;
   
         p.push();
         p.textSize(24);

@@ -98,6 +98,7 @@
             num_trials: sess.num_tasks[sess.phase_index],
             num_phases: sess.num_phases,
             language : lang,
+            volume: sess.volume,
         }
         timeline.push(image_space);
         
@@ -120,7 +121,8 @@
                         "time": time,
                         "misclicks": misclick,
                         "listens": listens
-                    };                
+                    };
+                jatos.studySessionData.volume = results.volume;               
                 jatos.studySessionData.task_index += 1;
                 if (jatos.studySessionData.task_index >= jatos.studySessionData.num_tasks[jatos.studySessionData.phase_index]){
                     jatos.studySessionData.phase_index +=1;
