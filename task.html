@@ -39,7 +39,7 @@
         var sess =jatos.studySessionData;
         console.log(sess);
         console.log(`Task index ${sess.task_index}`);
-        
+        var mode =sess.task_modes[sess.phase_index];
         var samples = sess.task_dict[sess.phase_index][sess.task_index];
         var sample_data = JSON.parse(sessionStorage.getItem("sample_data"));
         console.log(sample_data)
@@ -50,8 +50,11 @@
             
             var sample= sample_data[index]
             console.log(sample);
+
             test_sounds.push(`static/audio/${sample.name}.mp3`);
-            test_images.push(`static/image/${sample.name}.png`);
+            if (sess.task_modes[sess.phase_index] =="TEXTURE"){
+                test_images.push(`static/image/${sample.name}.png`);
+            }
             if (sess.task_modes[sess.phase_index] =="PRACTICE")(
                 target_index = Math.floor(Math.random(0, samples.length))
             )
