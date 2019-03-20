@@ -29,7 +29,7 @@
     
 </div>
 <script>
-
+    
     function median(values){
         values.sort(function(a,b){
             return a-b;
@@ -66,9 +66,10 @@
         if (jatos.studySessionData.language){
             lang = jatos.studySessionData.language;
         }
+        mode = jatos.studySessionData.task_type;
         results = jatos.studySessionData.results;
         formatted_data = {
-            "fields" : ["Partie", "Numero de tache", "Temps (s)", "# Erreurs", "# Ecoutes"],
+            "fields" : ["Partie", "Numero de tache", "Temps (ms)", "# Erreurs", "# Ecoutes"],
             "data" :[]
         }
         
@@ -76,13 +77,32 @@
             "fields" : ["Partie", "Meilleur temps (ms)", "Pire temps (ms)", "Temps moyen (ms)", "Temps mediane(ms)", "# Erreurs", "# Ecoutes"],
             "data" :[]
         }
-        phase_names = {
-            1:"Partie 1a",
-            2:"Partie 1b",
-            3:"Partie 2a",
-            4:"Partie 2b",
-            5:"Partie 3",
+        all_phase_names = {
+            "COLOR":{
+                1:"Partie 1a - Recherche de sons ",
+                2:"Partie 1b - Recherche de sons (rapidement)",
+                3:"Partie 2a - Association entre son et couleur",
+                4:"Partie 2a - Association entre son et couleur (rapidement)",
+                5:"Partie 3 - Recherche de sons à l'aide de la couleur",
+            },
+            "TEXTURE":{
+                1:"Partie 1a - Recherche de sons ",
+                2:"Partie 1b - Recherche de sons (rapidement)",
+                3:"Partie 2a - Association entre sons et textures",
+                4:"Partie 2a - Association entre sons et textures (rapidement)",
+                5:"Partie 3 - Recherche de sons à l'aide de la texture",
+            },
+            "SHAPE":{
+                1:"Partie 1a - Recherche de sons ",
+                2:"Partie 1b - Recherche de sons (rapidement)",
+                3:"Partie 2a - Association entre sons et formes",
+                4:"Partie 2a - Association entre sons et formes (rapidement)",
+                5:"Partie 3 - Recherche de sons à l'aide de la forme",
+            }
         }
+        console.log(mode);
+        phase_names=all_phase_names[mode];
+        
         
         //Get data skipping training session
         for( let phase_index = 1;phase_index<Object.keys(results).length;phase_index++){
@@ -109,8 +129,7 @@
         data_csv = Papa.unparse(formatted_data);
         time_csv = Papa.unparse(formatted_time_data);
         displayCSV(time_csv);
-        // l = createDownloadableCsvFile("donnees_etude.csv", time_csv)
-        // l2 = createDownloadableCsvFile("donnees_etude_completes.csv", data_csv)
+        
         data_csv_blob = new Blob([data_csv], { type: "text/csv;charset=utf-8" });
         time_csv_blob = new Blob([time_csv], { type: "text/csv;charset=utf-8" });
         

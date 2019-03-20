@@ -110,7 +110,6 @@ jsPsych.plugins["audio-image-space"] = (function () {
     if (trial.mode == "PRACTICE_2"){
       trial.image_size = 32;
     }
-
     // Data to be saved
     var trial_data = {
       target_index: trial.target_index,

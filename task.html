@@ -53,7 +53,7 @@
 
             test_sounds.push(`static/audio/${sample.name}.mp3`);
             if (sess.task_modes[sess.phase_index] =="TEXTURE"){
-                test_images.push(`static/image/${sample.name}.png`);
+                test_images.push(`static/image/${sample.name}.jpg`);
             }
             if (sess.task_modes[sess.phase_index] =="PRACTICE")(
                 target_index = Math.floor(Math.random(0, samples.length))
@@ -61,13 +61,12 @@
             if (sess.phase_index ==5){
                 test_coordinates.push([Math.random()*0.8+0.1, Math.random()*0.8+0.1])
             }
-
             else{
-
                 //Limit coordinates to 0.1-0.9
-                sample.coords[0] = 0.1 + sample.coords[0] *0.8;
-                sample.coords[1] = 0.1 + sample.coords[1] *0.8
-                test_coordinates.push([sample.coords[0], sample.coords[1]])
+                let coords = [0,0];
+                coords[0] = 0.1 + sample.coords[0] *0.8;
+                coords[1] = 0.1 + sample.coords[1] *0.8
+                test_coordinates.push([coords[0], coords[1]])
             }
             test_colors.push([sample.color[0], sample.color[1], sample.color[2]])
             test_envelopes.push(sample.env);
