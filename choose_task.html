@@ -13,9 +13,12 @@
     <div class= "TaskDescription">
         <div id="CHOOSE"></div>
     <div></div>
-    <button id="TEXTURE" type="button" class="btn btn-success"></button>
-    <button id="COLOR" type="button" class="btn btn-success"></button>
-    <button id="SHAPE" type="button" class="btn btn-success"></button>
+    <button id="SEQ1" type="button" class="btn btn-success">1</button>
+    <button id="SEQ2" type="button" class="btn btn-success">2</button>
+    <button id="SEQ3" type="button" class="btn btn-success">3</button>
+    <button id="SEQ4" type="button" class="btn btn-success">4</button>
+    <button id="SEQ5" type="button" class="btn btn-success">5</button>
+    <button id="SEQ6" type="button" class="btn btn-success">6</button>
 </div>
 
 </div>
@@ -47,46 +50,42 @@
         }
         
         choose_strings = {
-            "default": "<h2>Choose your visualisation type</h2>",
-            "fr": "<h2>Choisissez la sorte de visualisation</h2>"
+            "default": "<h2>Choose the study number you have been assigned</h2>",
+            "fr": "<h2>Choisissez le numéro qui vous a été assigné</h2>"
         }
+        $("#CHOOSE").html(choose_strings[lang])
 
-        button_strings = {
-            "default": {
-                "COLOR":"Color",
-                "TEXTURE":"Texture",
-                "SHAPE":"Shape",
-                
-            },
-            "fr": {
-                "COLOR":"Couleur",
-                "TEXTURE":"Texture",
-                "SHAPE":"Forme",
-                
-            },            
-        }
-        $('#CHOOSE').html( choose_strings[lang] );
-        $("#TEXTURE").html(button_strings[lang]["TEXTURE"])
-        $("#COLOR").html(button_strings[lang]["COLOR"])
-        $("#SHAPE").html(button_strings[lang]["SHAPE"])
-
-        $("#TEXTURE").click(function(){
-            jatos.studySessionData["task_type"] = "TEXTURE";
+        $("#SEQ1").click(function(){
+            jatos.studySessionData["mode_order"] = ["TEXTURE", "COLOR", "SHAPE"];
             jatos.submitResultData(JSON.stringify(jatos.studySessionData));
             jatos.startNextComponent()
         });
-        
-        $("#COLOR").click(function(){
-            jatos.studySessionData["task_type"] = "COLOR";
+        $("#SEQ2").click(function(){
+            jatos.studySessionData["mode_order"] = ["TEXTURE", "SHAPE", "COLOR", ];
             jatos.submitResultData(JSON.stringify(jatos.studySessionData));
             jatos.startNextComponent()
         });
-        
-        $("#SHAPE").click(function(){
-            jatos.studySessionData["task_type"] = "SHAPE";
+        $("#SEQ3").click(function(){
+            jatos.studySessionData["mode_order"] = ["COLOR","TEXTURE",  "SHAPE"];
             jatos.submitResultData(JSON.stringify(jatos.studySessionData));
             jatos.startNextComponent()
-        });               
+        });
+        $("#SEQ4").click(function(){
+            jatos.studySessionData["mode_order"] = ["COLOR",  "SHAPE", "TEXTURE"];
+            jatos.submitResultData(JSON.stringify(jatos.studySessionData));
+            jatos.startNextComponent()
+        });
+        $("#SEQ5").click(function(){
+            jatos.studySessionData["mode_order"] = ["SHAPE", "TEXTURE", "COLOR", ];
+            jatos.submitResultData(JSON.stringify(jatos.studySessionData));
+            jatos.startNextComponent()
+        });
+        $("#SEQ6").click(function(){
+            jatos.studySessionData["mode_order"] = ["SHAPE", "COLOR", "TEXTURE"  ];
+            jatos.submitResultData(JSON.stringify(jatos.studySessionData));
+            jatos.startNextComponent()
+        });
+                  
     });
 </script>
 </body>

@@ -27,12 +27,12 @@
             url:"static/html/task_descriptions.html",
             type:'GET',
             success: function(data) {
-                
-                let task_type = jatos.studySessionData["task_type"]
+                let sess =  jatos.studySessionData
+                let task_type = sess.mode_order[sess.mode_index]
                 
                 var lang = "default";
-                if (jatos.studySessionData.language){
-                    lang = jatos.studySessionData.language
+                if (sess.language){
+                    lang = sess.language
                 }
                 
                 mode_strings = {
@@ -56,7 +56,7 @@
                         return ctx.replace(/MODE_STRING/g, mode_strings[lang][task_type]);
                     })
                     $("#continue").click(function(){
-                    jatos.startComponentByPos( jatos.studySessionData.phaseComponentIndex);
+                    jatos.startComponentByPos( sess.phaseComponentIndex);
                 });
                 }
             });              

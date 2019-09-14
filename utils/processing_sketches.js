@@ -79,6 +79,20 @@ var drawBaseline = function(p, nodeGraph, imSize, hover_idx, misclicks){
   }
 }
 
+var drawNumbers = function(p, nodeGraph, imSize, hover_idx, misclicks){
+  // console.log("Drawing numbers")
+  p.textSize(30);
+  for (let idx = 0; idx < nodeGraph.nodes.length; idx++) {
+    p.push();
+    p.fill(200,10,10);
+    let n = nodeGraph.nodes[idx];
+    p.translate(n.x, n.y);
+    p.stroke(255,255,255);
+    p.text( idx,-15,15);
+    p.pop();
+  }
+}
+
 var drawEnvelope= function(p,n, contour, color, radius, offset){
   p.fill(color);
   p.beginShape();
@@ -164,7 +178,9 @@ var get_sketch= function(params) {
         var volume_verts =[];
         var volume_left = 0;
         var volume_width = 1.;
-
+        var show_numbers = false;
+        var WHITE_BACK = false;
+        var CYCLE = 0;
         if (mode == "TEXTURE"){
           p.preload = function () {
             for (let idx = 0; idx < trial.images.length; idx++) {
@@ -284,23 +300,50 @@ var get_sketch= function(params) {
             progress_text =  ti + "/" +trial.num_trials;
             text_width = p.textWidth(progress_text);
             p.text(progress_text, -text_width / 2, 100);
-
+            
+            CYCLE = trial.task_index %4
             p.pop();
             p.noStroke();
             p.fill(128, 0, 0);
-            p.rect(0, 0, 50, 50);
-            p.fill(255);
-            p.text("<---- " + mouseText, 52, 30);
+            //Top left
+            if (CYCLE ==0){            
+              p.rect(0, 0, 50, 50);
+              p.fill(255);
+              p.text("<---- " + mouseText, 52, 30);
+            }
+            //Top right
+            if (CYCLE ==1){            
+              p.rect(p.width-50, 0, 50, 50);
+              p.fill(255);
+              let m_string =   mouseText +"----> "
+              p.text(m_string,p.width -(p.textWidth(m_string) + 52), 30);
+            }
+            if (CYCLE ==2){            
+              p.rect(p.width-50, p.height-50, 50, 50);
+              p.fill(255);
+              let m_string =   mouseText +"----> "
+              p.text(m_string,p.width -(p.textWidth(m_string) + 52), p.height -30);
+            }
+
+            //Bottom Left
+            if (CYCLE ==3){            
+              p.rect(0, p.height-50, 50, 50);
+              p.fill(255);
+              let m_string =  "<---- " + mouseText;
+              p.text(m_string, 52, p.height -30);
+            }
             return;
           }
     
           //Trial screen
-          p.background(240);
+          if (WHITE_BACK) p.background(255);
+          else p.background(240);
           p.drawHeader();
           //debugger;
           p.push();
 
           // console.log(trial_data.misclicks)
+
           if (mode == "TEXTURE"){
             drawTexture(p, nodeGraph,images, imSize, hover_idx, trial_data.misclicks);
           }
@@ -315,8 +358,13 @@ var get_sketch= function(params) {
           }
           else if (mode == "PRACTICE"){
             drawBaseline(p, nodeGraph, imSize, hover_idx, trial_data.misclicks)
-            return;
           }
+
+          if (show_numbers){
+            drawNumbers(p, nodeGraph, imSize, hover_idx, trial_data.misclicks);
+          }
+          
+ 
           p.pop();
 
           if (p.frameCount % 5 == 0) {
@@ -453,13 +501,14 @@ var get_sketch= function(params) {
             return;
           }
           else if (image_index != trial.target_index) {
+            trial_data.click_times.push(new Date() - trial_data.start_time);
             trial_data.misclicks.push(image_index);
             trial_data.num_misclicks += 1;
             console.log(`Misclick on ${image_index} `)
           }
           else if (image_index == trial.target_index) {
             console.log(`Correct click on ${image_index}`)
-            
+            trial_data.click_times.push(new Date() - trial_data.start_time);
             ended = true;
             if (mode == "PRACTICE"){
               return;
@@ -484,7 +533,10 @@ var get_sketch= function(params) {
           hover_idx = lookup_array[mouseX][mouseY];
           if (hover_idx != -1) {
             if (lastMouseIndex != hover_idx) {
+              trial_data.play_times.push(new Date() - trial_data.start_time);
+              trial_data.played_sounds.push(hover_idx);
               player.playSound(hover_idx);
+              console.log("Play sound " + hover_idx)
             }
           }
           lastMouseIndex = hover_idx;
@@ -502,7 +554,11 @@ var get_sketch= function(params) {
           }
           //Pressing space bar starts the experiment and plays the target sound
           if (!started) {
-            if (p.mouseX < 50 && p.mouseX > 0 && p.mouseY < 50 && p.mouseY > 0) {
+            if (CYCLE ==0 &&(p.mouseX < 50 && p.mouseX > 0 && p.mouseY < 50 && p.mouseY > 0) ||
+                CYCLE ==1 &&(p.mouseX > p.width - 50 && p.mouseX <p.width && p.mouseY < 50 && p.mouseY > 0) ||
+                CYCLE ==2 &&(p.mouseX > p.width - 50 && p.mouseX <p.width && p.mouseY < p.height && p.mouseY > p.height -50)||
+                CYCLE ==3 && (p.mouseX > 0 && p.mouseX <50 && p.mouseY < p.height && p.mouseY > p.height -50) 
+            ){
               console.log("Starting experiment!")
               //start timer
               started = true;
@@ -514,8 +570,23 @@ var get_sketch= function(params) {
           // Spacebar
           if (p.key == ' ') {
             trial_data.listen_count += 1;
+            trial_data.listen_times.push(new Date() - trial_data.start_time);
             player.playSound(trial.target_index);
+            console.log("Play sound" + trial.target_index)
+
+          } 
+          // Spacebar
+          else if (p.key == 'P') {
+            show_numbers =!show_numbers;
+            console.log("Show numbers " + show_numbers)
           }
+
+          else if (p.key == 'W') {
+            WHITE_BACK =!WHITE_BACK;
+            console.log("WHITE " +WHITE_BACK)
+          }
+          console.log(p.key)
+
           return false;
         }
       };

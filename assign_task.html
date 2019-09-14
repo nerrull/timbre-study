@@ -12,7 +12,12 @@
 
 <body>
     <div class= "TaskDescription">
+
+        <div>
+            ID CODE: <div id="id"></div>
+        </div>
         <div id="description_div"></div>
+        
         <div id="next_button">...Loading study data</div>
         </div>
         </div>
@@ -42,69 +47,112 @@
             }
             return array;
         }
-        
-        function generateTaskSamples( studyData, mode){
+
+
+
+        function generateTaskSamplesMultiMode( studyData, modes){
             var taskDict = {};
             var samples = {}
-            var nTasks = [1,4,6,6,6,6];
-            // var nTasks = [1,1,1,1,1,1];
+            results = {}
+            taskDict = {}
+            //Practice //
+            var i =0;
+            var nTasks, nSamplesPerTask, taskModes;
+            var actualNumSamples = studyData["n_samples"];
 
+            var shuffleIndexes = [...Array(actualNumSamples)].map((_,i) => i);
+            var sampleIndexes = shuffle(shuffleIndexes);
 
-            var nSamplesPerTask = [15,30,30,30,30,30];
-            // var nSamplesPerTask = [15,40,40,40,40,40];
+            var totalSamples = 6*3*30*3 +8*30*3 +10*30*3 +15
 
-            // var nSamplesPerTask = [2,2,2,2,2,2];
-
-
-            var totalSamples = nTasks.map((v, i) => nSamplesPerTask[i]*v).reduce((pv, v) => pv+v)
-            console.log("Total study samples : " +totalSamples)
-            var actual_num_samples = studyData["n_samples"]
-            console.log("Number of samples : " + actual_num_samples )
-            var nTotalSamples = actual_num_samples;
-            var shuffleIndexes = [...Array(nTotalSamples)].map((_,i) => i);
-            sampleIndexes = shuffle(shuffleIndexes);
-                        
             while (sampleIndexes.length < totalSamples){
                 let s2 =  shuffle(shuffleIndexes.slice());
                 sampleIndexes = sampleIndexes.concat(s2);
-                console.log(sampleIndexes)
             }
+            console.log("Total study samples : " +totalSamples);
+            console.log("Number of samples : " + actualNumSamples );
+            console.log(sampleIndexes)
 
+            jatos.studySessionData["num_tasks"] = [];
+            jatos.studySessionData["task_modes"] = [];
+            jatos.studySessionData["num_phases"] = [];
+            jatos.studySessionData["targets"]= [];
+            var targets = []
 
-            var nPhases = nTasks.length;
-            jatos.studySessionData["num_tasks"] = nTasks;
-            
-            var task_modes = ["PRACTICE","BASELINE", "BASELINE", ...[...Array(3)].map((_,i)=>mode)]
-            jatos.studySessionData["task_modes"] = task_modes;
-            jatos.studySessionData["num_phases"] = nPhases;
-            results = {}
+            for (let i in modes){
+                let mode = modes[i];
+                var taskModes;
+                if (i==0){
+                    nTasks = [1,6,6,6,8,10];
+                    nSamplesPerTask = [15,30,30,30,30,30];
+                    // nSamplesPerTask = [2,2,2,2,2,2];
+                    // nTasks = [1,1,1,1,1,1];
+                    taskModes = ["PRACTICE","BASELINE", "BASELINE", mode, mode, mode+"_RANDOM"];
+                }
+                else{
+                    nTasks = [6,6,6,6,8,10];
+                    nSamplesPerTask = [30,30,30,30,30,30];
+                    // nSamplesPerTask = [2,2,2,2,2,2];
+                    // nTasks = [1,1,1,1,1,1];
+                    taskModes = ["BASELINE_RANDOM", "BASELINE", "BASELINE",  mode, mode, mode +"_RANDOM"]
+                }
+                jatos.studySessionData["num_tasks"].push(nTasks);
+                jatos.studySessionData["task_modes"].push(taskModes);
 
-            sampleIndex =0;
-            // Generate sample sets for tasks
-            for (var p =0; p<nPhases; p++){
-                taskDict[p]={};
-                results[p]={};
-                
-                for (var t =0; t<nTasks[p]; t++){
-                    var sampleList =[];
-                    for (var s =0; s<nSamplesPerTask[p]; s++){
-                        sampleList.push(sampleIndexes[sampleIndex]);
-                        let sample = studyData.samples[sampleIndexes[sampleIndex]];
-                        samples[sampleIndexes[sampleIndex]] =  sample;
-                        sampleIndex ++;
-                    }
-                    taskDict[p][t]= sampleList;
-                    results[p][t]={};
+                var nPhases = nTasks.length;
+                jatos.studySessionData["num_phases"].push(nPhases);
 
+                taskDict[i]= {}
+                results[i]= {}
+                sampleIndex =0;
+                // Generate sample sets for tasks
+                for (var p =0; p<nPhases; p++){
+                    taskDict[i][p]={};
+                    results[i][p]={};
+                    
+                    for (var t =0; t<nTasks[p]; t++){
+                        var sampleList =[];
+                        let temp_target= sampleIndexes[sampleIndex];
+                        let temp_index = sampleIndex;
+                        
+                        //Make sure we haven't already ahd the same target
+                        while (targets.includes(temp_target)){
+                            temp_index ++;
+                            temp_target= sampleIndexes[temp_index]
+                        }
+
+                        //If we had to search for a new target, perform the swap
+                        if (temp_index!=sampleIndexes){
+                            let b = sampleIndexes[temp_index];
+                            sampleIndexes[temp_index]= sampleIndexes[sampleIndex];
+                            sampleIndexes[sampleIndex]=b;
+                            console.log("had to swap samples")
+                        }
+                        targets.push(sampleIndexes[sampleIndex])
+                        //Fill the task
+                        for (var s =0; s<nSamplesPerTask[p]; s++){
+                            sampleList.push(sampleIndexes[sampleIndex]);
+                            let sample = studyData.samples[sampleIndexes[sampleIndex]];
+                            samples[sampleIndexes[sampleIndex]] =  sample;
+                            sampleIndex ++;
+                        }
+
+                        taskDict[i][p][t]= sampleList;
+                        results[i][p][t]={};
+                    } 
                 } 
-            } 
-            console.log(samples)
-            console.log(taskDict)
-            jatos.studySessionData["results"] = results;
 
-            return [taskDict, samples];
+            }                      
+            jatos.studySessionData["targets"]= targets;
+            jatos.studySessionData["results"] = results;
+            jatos.studySessionData["task_dict"] =taskDict;
+            console.log(targets);
+
+            console.log(samples);
+            console.log(taskDict);
+            return  samples;
         }
-        
+
         function sessionSuccess(){
             console.log("Succesfully sent session data");
             console.log(jatos.studySessionData);
@@ -115,9 +163,6 @@
         }
         
         jatos.onLoad(function () {
-            if (jatos.studySessionData["task_type"] ==null){
-                jatos.studySessionData["task_type"] = getRandomTaskID();
-            }
             var lang = "default";
 
             if (jatos.studySessionData.language){
@@ -134,29 +179,39 @@
                     url:"static/html/task_descriptions.html",
                     type:'GET',
                     success: function(data) {
-                        console.log("Task type : " +jatos.studySessionData["task_type"])
+                        console.log("Mode order : " +jatos.studySessionData["mode_order"])
                         console.log("Language: "+lang)
                         var description = $('<div>').append(data).find('#task_description').find(`#${lang}`);
                         let title = $('<div>').append(data).find('#title').find(`#${lang}`)
-
-                        // console.log(description)
-                        // console.log(title)
                         $('#description_div').html( description );
+
+
+                        if ("uuid" in jatos.urlQueryParameters){
+                            console.log("Assigning previous uuid:" + jatos.urlQueryParameters["uuid"])
+                            jatos.studySessionData["uuid"] = jatos.urlQueryParameters["uuid"];
+                            jatos.studySessionData["phase_index"] = 3;
+                        }
+                        else{
+                            jatos.studySessionData["uuid"] = uuid4();
+                        }
+                        console.log("Participant ID: "+jatos.studySessionData["uuid"])
+
+                        $("#id").text(jatos.studySessionData["uuid"])
                     }
                 });
 
             var json= $.getJSON("static/data/study_data.json", function(studyData){         
-                tasks_samples = generateTaskSamples(studyData,jatos.studySessionData["task_type"] );
-                var samples = tasks_samples[1];
-                jatos.studySessionData["task_dict"] =tasks_samples[0];
+                let samples = generateTaskSamplesMultiMode(studyData,jatos.studySessionData["mode_order"] );
+                jatos.studySessionData["task_index"] = jatos.studySessionData["mode_order"][0];
+
                 jatos.studySessionData["task_index"] = 0;
                 jatos.studySessionData["phase_index"] = 0;
+                jatos.studySessionData["mode_index"] = 0;
                 jatos.studySessionData["num_practices"] = 1;
                 jatos.studySessionData["volume"] = 0.5;
 
 
-                jatos.studySessionData["uuid"] = uuid4();
-                console.log("Participant UUID: "+jatos.studySessionData["uuid"])
+
                 let continueString ="Continue" 
                 if (lang =="fr") {continueString= "Continuer"};
 

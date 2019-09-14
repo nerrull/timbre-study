@@ -25,6 +25,84 @@
 </head>
 <body>
 <script>  
+
+    function getTitles(sess, mode){
+        var partTitles, subTitles, subsubTitles;
+
+        typeStringsEn = {
+            "COLOR": "colors",
+            "SHAPE": "shapes",
+            "TEXTURE": "textures"
+        }
+        typeStringsEnSingular = {
+            "COLOR": "color",
+            "SHAPE": "shape",
+            "TEXTURE": "texture"
+        }
+
+        typeStringsFR = {
+            "COLOR": "couleurs",
+            "SHAPE": "formes",
+            "TEXTURE": "textures"
+        }
+        typeStringsFRSingular = {
+            "COLOR": "couleur",
+            "SHAPE": "form",
+            "TEXTURE": "texture"
+        }
+
+        if (sess.mode_index ==0){
+            partTitles = {
+                "default" : ["Practice", "Part 1", "Part 1", "Part 2", "Part 2", "Part 3" ],
+                "fr" : ["Pratique", "Partie 1", "Partie 1", "Partie 2", "Partie 2", "Partie 3" ],
+            }
+
+            subTitles = {
+                "default" : [
+                    "", 
+                    "Looking for sounds", "Looking for sounds", 
+                    "Associating sounds and "+typeStringsEn[mode], "Associating sounds and "+typeStringsEn[mode],
+                    "Finding sounds using "+  typeStringsEnSingular[mode]
+                ],
+                "fr" : [
+                    "", 
+                    "Recherche de sons", "Recherche de sons", 
+                    "Association entre sons et "+typeStringsFR[mode] , "Association entre sons et "+typeStringsEn[mode], 
+                    "Recherche de sons à l'aide de la "+  typeStringsFRSingular[mode]
+                ],
+            }
+            subsubTitles = {
+                "default" : ["", "", "Quickly!", "", "Quickly!", "Quickly!"],
+                "fr" : ["", "", "Rapidement!", "", "Rapidement!", "Rapidement!"]
+            }
+        }
+        else{
+            partTitles = {
+                "default" : ["",  "Part 1","Part 1", "Part 2", "Part 2", "Part 3" ],
+                "fr" : ["",  "Partie 1","Partie 1", "Partie 2", "Partie 2", "Partie 3" ],
+            } 
+
+            subTitles = {
+                "default" : [
+                    "Random placement", 
+                    "Looking for sounds", "Looking for sounds",
+                    "Associating sounds and "+typeStringsEn[mode], "Associating sounds and "+typeStringsEn[mode],
+                    "Finding sounds using "+  typeStringsEnSingular[mode]
+                ],
+                "fr" : [
+                    "Positionnement aléatoire", 
+                    "Recherche de sons", "Recherche de sons",
+                    "Association entre sons et "+typeStringsFR[mode] , "Association entre sons et "+typeStringsEn[mode], 
+                    "Recherche de sons à l'aide de la "+  typeStringsFRSingular[mode]
+                ],
+            }
+            subsubTitles = {
+                "default" : ["Quickly!","", "Quickly!", "", "Quickly!", "Quickly!"],
+                "fr" : ["Rapidement!","", "Rapidement!", "", "Rapidement!", "Rapidement!"]
+            }
+        }
+        return [partTitles, subTitles, subsubTitles];
+    }
     jatos.onLoad(function () {
         
         /* create timeline */
@@ -39,39 +117,49 @@
         var sess =jatos.studySessionData;
         console.log(sess);
         console.log(`Task index ${sess.task_index}`);
-        var mode =sess.task_modes[sess.phase_index];
-        var samples = sess.task_dict[sess.phase_index][sess.task_index];
+        var TASK_MODE =sess.task_modes[sess.mode_index][sess.phase_index];
+
+        var samples = sess.task_dict[sess.mode_index][sess.phase_index][sess.task_index];
         var sample_data = JSON.parse(sessionStorage.getItem("sample_data"));
-        console.log(sample_data)
+        console.log(sample_data);
         var target_index = 0;
+        let isRandom =false;
+
+        if (TASK_MODE.includes("RANDOM")){
+            console.log("RANDOM PHASE")
+            isRandom = true;
+            TASK_MODE = TASK_MODE.split("_")[0]
+            console.log("Extracted mode "+ TASK_MODE+ " from " + sess.task_modes[sess.mode_index][sess.phase_index])
+        }
+
         for (var i =0; i<samples.length; i++){
             var index = samples[i];
             console.log(index);
             
             var sample= sample_data[index]
             console.log(sample);
-
             test_sounds.push(`static/audio/${sample.name}.mp3`);
-            if (sess.task_modes[sess.phase_index] =="TEXTURE"){
+            if (TASK_MODE =="TEXTURE"){
                 test_images.push(`static/image/${sample.name}.jpg`);
             }
-            if (sess.task_modes[sess.phase_index] =="PRACTICE")(
+            else if (TASK_MODE=="PRACTICE")(
                 target_index = Math.floor(Math.random(0, samples.length))
             )
-            if (sess.phase_index ==5){
+
+            if (isRandom){
+
                 test_coordinates.push([Math.random()*0.8+0.1, Math.random()*0.8+0.1])
             }
             else{
-                //Limit coordinates to 0.1-0.9
+                //Limit coordinates
                 let coords = [0,0];
                 coords[0] = 0.1 + sample.coords[0] *0.8;
                 coords[1] = 0.1 + sample.coords[1] *0.8
                 test_coordinates.push([coords[0], coords[1]])
             }
+
             test_colors.push([sample.color[0], sample.color[1], sample.color[2]])
             test_envelopes.push(sample.env);
-            
-            // test_envelopes.push(sample.env);
         }
         console.log(test_sounds);
         console.log(test_images);
@@ -82,6 +170,18 @@
             lang = jatos.studySessionData.language
         }
 
+        titles=  getTitles(sess, TASK_MODE);
+        partTitles= titles[0];
+        subTitles = titles[1];
+        subsubTitles= titles[2];
+
+        title=  partTitles[lang][sess.phase_index];
+        subTitle = subTitles[lang][sess.phase_index]
+        subsubTitle= subsubTitles[lang][sess.phase_index]
+        console.log(title, subTitle, subsubTitle)
+
+
+        let dims = [$(window).width()-300, $(window).height()-150]
         /* define image space trial */
         var image_space = {
             type:"audio-image-space",
@@ -89,15 +189,18 @@
             images: test_images,
             colors: test_colors,
             envelopes: test_envelopes,
-            mode :sess.task_modes[sess.phase_index],
-            
+            mode :TASK_MODE,
+            title : title,
+            subtitle: subTitle,
+            subsubtitle: subsubTitle,
             coordinates : test_coordinates,
-            dims : [800,800],
+            dims : dims,
             image_size: 64,
             target_index: 0,
+            mode_index: sess.mode_index,
             task_index: sess.task_index,
             phase_index: sess.phase_index,
-            num_trials: sess.num_tasks[sess.phase_index],
+            num_trials: sess.num_tasks[sess.mode_index][sess.phase_index],
             num_phases: sess.num_phases,
             language : lang,
             volume: sess.volume,
@@ -109,16 +212,17 @@
             preload_audio: test_sounds,
             on_finish: function() {
                 var resultJson = jsPsych.data.get().json();
-/*                 console.log ("Results:\n" +resultJson)
+/*              console.log ("Results:\n" +resultJson)
                 console.log("Incrementing task index") */
                 //console.log("Task index:" + jatos.studySessionData.task_index)
                 //Increment phase index
-                results= JSON.parse(resultJson)[0]
+                let sess = jatos.studySessionData;
+                results= JSON.parse(resultJson)[0];
+                resultJson = JSON.stringify(results);
                 time = results["elapsed_time"];
                 misclick = results["num_misclicks"];
                 listens = results["listen_count"];
-
-                jatos.studySessionData.results[jatos.studySessionData.phase_index][jatos.studySessionData.task_index] =
+                jatos.studySessionData.results[sess.mode_index][sess.phase_index][sess.task_index] =
                     {
                         "time": time,
                         "misclicks": misclick,
@@ -126,23 +230,34 @@
                     };
                 jatos.studySessionData.volume = results.volume;               
                 jatos.studySessionData.task_index += 1;
-                if (jatos.studySessionData.task_index >= jatos.studySessionData.num_tasks[jatos.studySessionData.phase_index]){
+
+                
+                let task_index = jatos.studySessionData.task_index;
+
+                if (task_index >= jatos.studySessionData.num_tasks[sess.mode_index][sess.phase_index]){
+                    console.log("Next task")
                     jatos.studySessionData.phase_index +=1;
                     jatos.studySessionData.task_index = 0;
+                    let phase_index = jatos.studySessionData.phase_index;
                     
-                    if (jatos.studySessionData.phase_index ==  jatos.studySessionData.num_practices){
+                    //After practice go to study start
+                    if (phase_index ==  sess.num_practices){
                         jatos.submitResultData(resultJson);
                         jatos.startComponentByPos(sess.studyStartComponentIndex);
-
                     }
+
                     //Go to questionnaire for last two task trials
-                    if (jatos.studySessionData.phase_index ==  jatos.studySessionData.num_phases-1 ||jatos.studySessionData.phase_index == jatos.studySessionData.num_phases){
+                    else if (phase_index ==  sess.num_phases[sess.mode_index]-1 || jatos.studySessionData.phase_index == sess.num_phases[sess.mode_index]){
+                        console.log("going to questionnaire")
                         jatos.submitResultData(resultJson, jatos.startNextComponent);
                     }
+
                     //Just go to new phase description
                     else{
+                        console.log("going to next phase description")
+
                         jatos.submitResultData(resultJson);
-                        jatos.startComponentByPos(jatos.studySessionData.phaseComponentIndex);
+                        jatos.startComponentByPos(sess.phaseComponentIndex);
                     }
                 }
                 

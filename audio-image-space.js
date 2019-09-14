@@ -76,6 +76,12 @@ jsPsych.plugins["audio-image-space"] = (function () {
         default: 0,
         description: 'Index of the trial phase'
       },
+      mode_index: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'mode index',
+        default: 0,
+        description: 'Index of the trial mode'
+      },
       num_trials: {
         type: jsPsych.plugins.parameterType.INT,
         pretty_name: 'Number of trials',
@@ -99,6 +105,24 @@ jsPsych.plugins["audio-image-space"] = (function () {
         pretty_name: 'volume',
         default: 1.,
         description: 'Audio playback volume'
+      },
+      title: {
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Title',
+        default:"Title",
+        description: 'Title'
+      },
+      subtitle: {
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Subtitle',
+        default: 'Subtitle',
+        description: 'Subtitle'
+      },
+      subsubtitle: {
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Subtitle',
+        default: 'subSubtitle',
+        description: 'subSubtitle'
       }
     }
   }
@@ -107,17 +131,20 @@ jsPsych.plugins["audio-image-space"] = (function () {
   // https://github.com/processing/p5.js/wiki/Global-and-instance-mode
   plugin.trial = function (display_element, trial) {
     console.log(trial);
-    if (trial.mode == "PRACTICE_2"){
-      trial.image_size = 32;
-    }
+
     // Data to be saved
     var trial_data = {
       target_index: trial.target_index,
       num_misclicks: 0,
+      played_sounds:[],
       misclicks: [],
+      click_times :[],
+      listen_times:[],
+      play_times:[],
       mousePosition: [],
       task_index: trial.task_index,
       phase: trial.phase_index,
+      mode_index: trial.mode_index,
       elapsed_time: -1,
       start_time: -1,
       end_time: -1,
@@ -156,51 +183,7 @@ jsPsych.plugins["audio-image-space"] = (function () {
         "retry": "Réessayer",
         "mouseText": "Placez votre curseur ici",
       }
-    };
-    typeStringsEn = {
-      "COLOR": "colors",
-      "SHAPE": "shapes",
-      "TEXTURE": "textures"
-    }
-    typeStringsEnSingular = {
-      "COLOR": "color",
-      "SHAPE": "shape",
-      "TEXTURE": "texture"
-    }
-
-    typeStringsFR = {
-      "COLOR": "couleurs",
-      "SHAPE": "formes",
-      "TEXTURE": "textures"
-    }
-    typeStringsFRSingular = {
-      "COLOR": "couleur",
-      "SHAPE": "form",
-      "TEXTURE": "texture"
-    }
-
-    partTitles = {
-      "default" : ["Practice", "Part 1", "Part 1", "Part 2", "Part 2", "Part 3" ],
-      "fr" : ["Pratique", "Partie 1", "Partie 1", "Partie 2", "Partie 2", "Partie 3" ],
-    }
-    subTitles = {
-      "default" : [
-        "", 
-        "Looking for sounds", "Looking for sounds", 
-        "Associating sounds and "+typeStringsEn[trial.mode], "Associating sounds and "+typeStringsEn[trial.mode],
-        "Finding sounds using "+  typeStringsEnSingular[trial.mode]
-      ],
-      "fr" : [
-        "", 
-        "Recherche de sons", "Recherche de sons", 
-        "Association entre sons et "+typeStringsFR[trial.mode] , "Association entre sons et "+typeStringsEn[trial.mode], 
-        "Recherche de sons à l'aide de la "+  typeStringsFRSingular[trial.mode]
-      ],
-    }
-    subsubTitles = {
-      "default" : ["", "", "Quickly!", "", "Quickly!", "Quickly!"],
-      "fr" : ["", "", "Rapidement!", "", "Rapidement!", "Rapidement!"]
-    }
+    }; 
 
 
     var startMessageString = messages[trial.language]["startMessageString"];
@@ -210,10 +193,10 @@ jsPsych.plugins["audio-image-space"] = (function () {
     var retryString = messages[trial.language]["retry"];
     var mouseText=  messages[trial.language]["mouseText"]
 
-    var title=  partTitles[trial.language][trial.phase_index]
-    var subtitle=  subTitles[trial.language][trial.phase_index]
-    var subsubtitle=  subsubTitles[trial.language][trial.phase_index]
-
+    var title= trial.title
+    var subtitle=  trial.subtitle
+    var subsubtitle= trial.subsubtitle
+    console.log(title, subtitle, subsubtitle)
 
     //Initialize audio elements
     var context = jsPsych.pluginAPI.audioContext();
@@ -242,7 +225,7 @@ jsPsych.plugins["audio-image-space"] = (function () {
     var physics = getPhysics(imSize, trial.dims[0], trial.dims[1])     
     var nodeGraph = makeGraph(coords, physics, imSize);
     physics.update();
-
+    trial_data["coordinates"] = nodeGraph.getCoords();
 
     //Create and populate array for checking what element is hovered (or clicked)
     var lookup_array = new Array(trial.dims[0] + imSize).fill(-1).map(() => new Array(headerHeight + trial.dims[1] + imSize).fill(-1));
@@ -287,14 +270,10 @@ jsPsych.plugins["audio-image-space"] = (function () {
       
     } 
     //init the sketch
-    if (trial.mode == "PRACTICE_2"){
-      s= get_highlight_sketch(params);
-      var p5Instance = new p5(s, "p5_canvas_id");
-    }
-    else {
-      s= get_sketch(params);
-      var p5Instance = new p5(s, "p5_canvas_id");
-    }
+
+    s= get_sketch(params);
+    var p5Instance = new p5(s, "p5_canvas_id");
+    
 
   };
 

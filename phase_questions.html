@@ -3,9 +3,9 @@
 
 <head>
     <script src="javascript/jquery-3.1.1.min.js"></script>
-    <!-- <script src="survey-jquery/survey.jquery.js"></script> -->
+    <script src="survey-jquery/survey.jquery.min.js"></script>
     <script src="/assets/javascripts/jatos.js"></script>
-    <script src="https://surveyjs.azureedge.net/1.0.68/survey.jquery.min.js"></script>
+    <!-- <script src="https://surveyjs.azureedge.net/1.0.68/survey.jquery.min.js"></script> -->
     <link rel="stylesheet" href="bootstrap-3.3.7/css/bootstrap.min.css">
     <link href="static/css/forms.css" rel="stylesheet" type="text/css" media="all">
 
@@ -21,22 +21,63 @@
     <script>
         jatos.onLoad(function () {
                         
-            
+            let sess = jatos.studySessionData
             var lang = "default";
-            if (jatos.studySessionData.language){
-                lang = jatos.studySessionData.language;
+            if (sess.language){
+                lang = sess.language;
             }
             
             var complete = function (result) {
                 $("#info_form").hide(); // Hides the 'Thank you for completing ...' message
-                jatos.submitResultData(JSON.stringify(result.data));
-                //Go to final thank you component
-                if (jatos.studySessionData.phase_index >=jatos.studySessionData.num_phases){
+                resultData = JSON.stringify(result.data)
+                console.log("Questionnaire data: " +resultData);
+
+                function submitError(error){
+
+                    console.log(error);
+
+                    console.log("Data");
+                    console.log(resultData);
+                    debugger;
+                    // jatos.submitResultData(resultData, submitError );
+                }
+
+                function done(){
                     jatos.startNextComponent();
                 }
+
+                function startNextMode(){
+                    jatos.studySessionData.mode_index +=1;
+                    jatos.studySessionData.phase_index =0; 
+                    jatos.studySessionData["task_type"] =jatos.studySessionData["mode_order"][jatos.studySessionData.mode_index]; 
+                    console.log("Going to next mode: " + jatos.studySessionData["task_type"])
+                    jatos.startComponentByPos(jatos.studySessionData.phaseComponentIndex);
+                }
+                
+                function startNextPhase(){
+                    jatos.startComponentByPos(jatos.studySessionData.phaseComponentIndex);
+                }
+
+                // function debug(){
+                //     jatos.startComponentByPos(jatos.studySessionData.questionnaireComponentIndex)
+                // }
+                
+                // jatos.submitResultData(resultData, debug, submitError );
+                // return;
+                //Go to final thank you component
+                if (sess.phase_index >=sess.num_phases[sess.mode_index]){
+                    //If last mode
+                    if (jatos.studySessionData.mode_index ==2){
+                        jatos.submitResultData(resultData, done, submitError );
+                    }
+                    else{
+                        jatos.submitResultData(resultData, startNextMode, submitError );
+                    }
+                }
+
                 //Go to phase description
                 else {
-                    jatos.startComponentByPos(jatos.studySessionData.phaseComponentIndex);
+                    jatos.submitResultData(resultData, startNextPhase, submitError );
                 }
             }
 
@@ -64,12 +105,16 @@
                         "SHAPE":"formes"
                     }
                 }
-            let vis_string = mode_strings[lang][jatos.studySessionData.task_type]
-            let placement_string = placement_strings[lang][jatos.studySessionData.task_type]
+
+            let task_type = sess.mode_order[sess.mode_index]
+            let vis_string = mode_strings[lang][task_type]
+            let placement_string = placement_strings[lang][task_type]
+            
             Survey.Survey.cssType = "bootstrap";
             Survey.defaultBootstrapCss.navigationButton = "btn btn-green";
             var surveyJSON;
-            if(jatos.studySessionData.phase_index ==5){
+
+            if(sess.phase_index ==sess.num_phases[sess.mode_index]-1){
                 var surveyJSON = {pages:[{name:"page1",elements:[{type:"panel",name:"panel1",elements:[{type:"rating",name:"difficulty",title:{default:"How would you rate the degree of difficulty of the tasks?",fr:"Quel était le degré de difficulté des tâches?"},isRequired:true,rateValues:[1,2,3,4,5],minRateDescription:{default:"Very easy",fr:"Très facile"},maxRateDescription:{default:"Very difficult",fr:"Très difficile"}},{type:"rating",name:"visual_help",
                 title:{default:`Did the ${vis_string} help you find the target sound?`,
                 fr:`À quel point la ${vis_string} des éléments vous a aidé dans votre recherche?`},
@@ -88,7 +133,7 @@
                 // surveyJSON = { surveyId: 'b3778aff-52be-4acb-9ba1-d2cd78f9b674'}
                 
             }
-            else if (jatos.studySessionData.phase_index ==6){
+            else if (jatos.studySessionData.phase_index ==sess.num_phases[sess.mode_index]){
             var surveyJSON = {pages:[{name:"page1",elements:[{type:"panel",name:"panel1",elements:[{type:"rating",name:"difficulty",title:{default:"How would you rate the degree of difficulty of the task?",fr:"Quel était le degré de difficulté de la tâche?"},isRequired:true,rateValues:[1,2,3,4,5],minRateDescription:{fr:"Très facile",default:"Very easy"},maxRateDescription:{default:"Very difficult",fr:"Très difficile"}},{type:"rating",name:"visual_help",
             title:{default:`Did the ${vis_string} help you find the target sound?`,
             fr:`À quel point la ${vis_string} des éléments vous a aidé dans votre recherche?`},
