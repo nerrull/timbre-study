@@ -6,6 +6,12 @@ There are few studies focused on the effect of these mappings on the time it tak
 We designed a study to compare shape, colour and texture as visual labels in a known-item search task.
 
 We are specifically interested in visually differentiating the **timbre** of sound samples so we used samples  of different instruments all playing the same note (see the data section).
+
+# Try it out
+The easiest way to understand the study is to give it a shot!
+
+[Use this link to try the study](http://178.128.233.100/publix/8/start?batchId=31&generalMultiple)
+
 # Overview
 This repository contains source code for a browser-based study on audio visualisation. The study is bi-lingual and participants can choose between french or english as their preferrred language.
 The goal of the study is to determine whether different sound visualisation approaches can assist in a known-item search task.
@@ -68,11 +74,10 @@ The zipped packages already contain the git files to link them to the appropriat
 
 ## Variants (branches)
 ### master
-Participants will choose a visualisation mode and complete one full pass of the study
+Participants are assigned a random visualisation mode and complete one full pass of the study.
 
 ### students
-Same as master, but the final page presents some of the data collected (mean times, number of samples visited)
-and allows them to download this data as a .csv file.
+Same as master, but participants can choose the visualisation mode and the final page presents some of the data collected (mean times, number of samples visited).
 
 ### on-site
 This variant was developed for participants who were paid to complete the study on-location. 
