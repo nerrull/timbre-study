@@ -46,7 +46,7 @@
         function generateTaskSamples( studyData, mode){
             var taskDict = {};
             var samples = {}
-            var nTasks = [1,4,6,6,6,6];
+            var nTasks = [1,6,6,6,6,6];
             // var nTasks = [1,1,1,1,1,1];
 
 
@@ -153,7 +153,6 @@
                 jatos.studySessionData["phase_index"] = 0;
                 jatos.studySessionData["num_practices"] = 1;
                 jatos.studySessionData["volume"] = 0.5;
-
 
                 jatos.studySessionData["uuid"] = uuid4();
                 console.log("Participant UUID: "+jatos.studySessionData["uuid"])

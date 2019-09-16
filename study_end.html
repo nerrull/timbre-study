@@ -15,6 +15,10 @@
 </body>
 <div class=FormBox>
     <div id="message_div"></div>
+    <div><h4>   <a id="link", target="_blank"></a>
+    </h4></div>
+    <div id="close_message"></div>
+
 </div>
 <script>
     jatos.onLoad(function () {
@@ -28,11 +32,16 @@
                 if (jatos.studySessionData.language){
                     lang = jatos.studySessionData.language
                 }
-                let message = $('<div>').append(data).find('#end_message').find(`#${lang}`)
-                    $('#message_div').html( message );
-                    document.body.innerHTML = document.body.innerHTML.replace(/ID_STRING/g, jatos.studySessionData["uuid"]);
-
-                }
+                let message = $('<div>').append(data).find('#end_message').find(`#${lang}`);
+                $('#message_div').html( message );
+                document.body.innerHTML = document.body.innerHTML.replace(/ID_STRING/g, jatos.studySessionData["uuid"]);
+                let link = "http://178.128.233.100/publix/9/start?batchId=25&generalMultiple"
+                let link_address = link+ "&uuid="+jatos.studySessionData["uuid"]
+                $("#link").html(link_address);
+                $("#link").attr("href", link_address);
+                let close = $('<div>').append(data).find('#close_message').find(`#${lang}`);
+                $('#close_message').html( close );
+            }
             });
             
         });
