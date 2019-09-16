@@ -18,13 +18,13 @@ Tasks proceed in this manner:
 * They must find and click on the visual element representing the the sound.
 * They position their mouse cursor to highlight and listen to sound samples.
 
-![Study interface](https://github.com/nerrull/timbre-texture-study/raw/master/readme_image/interface.png)
+![Study interface](https://github.com/nerrull/timbre-study/raw/master/readme_image/interface.png)
 
 We test 3 different sound visualisation methods. 
 This study is designed to produce data that will allow us measure the impact of the visualisation method on the participants ability to complete the task.
 It also serves as a way to measure whether providing positionl information can assist in the search task,
 as it allows for precalculated canvas coordinates to be assigned to the sound samples. 
-We use a dimensionality-reduction approach on timbral profiles extracted using [this filterbank](Asdgasd).
+We use a dimensionality-reduction approach on timbral profiles extracted using [this filterbank](https://github.com/nerrull/ERBlet-Cochlear-Filterbank/).
 
 ### Shape
 Visual elements have a contour that is based on the temporal envelope of the sound sample.
@@ -35,9 +35,9 @@ Visual elements have a colour that is based on timbral descriptors.
 * The spectral flatnesss is mapped to the color saturation
 
 ### Texture
-Each sound sample is associated with a textural image file. We generate these textures using a custom-built tool you can find [here](https://github.com/timbre-texture).
+Each sound sample is associated with a textural image file. We generate these textures using a custom-built tool you can find [here](https://github.com/nerrull/timbre-texture-generator).
 
-![Visualization modes](https://github.com/nerrull/timbre-texture-study/raw/master/readme_image/vis_modes.png)
+![Visualization modes](https://github.com/nerrull/timbre-study/raw/master/readme_image/vis_modes.png)
 
 The study tasks are divided into 4 parts:
 
@@ -50,7 +50,8 @@ The study tasks are divided into 4 parts:
 For more in-depth information you can consult our article published in the 
 proceedings of [Audio Mostly 2019](https://audiomostly.com/).
 
-Please cite this work if you use our study in your own research.
+Please cite this article if you use our study in your own research.
+
 ```CITATION PENDING```
 
 # Set up
@@ -59,7 +60,7 @@ http://www.jatos.org/Get-started.html
 
 It is much simpler to import a study using the jatos interface so we suggest the following procedure
 
-1. Download a zipped study (this is the easiest way to add a study to JATOS) from [this link](drive) .
+1. Download a zipped study (this is the easiest way to add a study to JATOS) from [this Google Drive folder](https://drive.google.com/drive/folders/1gR94POzofFTQ77MwG61Jut5nZVMyvCDy?usp=sharing) .
 2. On the JATOS homepage, click ''Import study'' and find the zipped package.
 
 We have created several versions of the study for different audiences. The source code for each variant is its own sub-branch of this repo.
@@ -91,7 +92,7 @@ The logic for selecting samples and generating sets of tasks can be found in ```
 
 ### Data 
 For the study to be functional, you need audio samples, texture images and a dataset containing sample ids, coordinates, colors and audio envelopes. 
-The study packages contains the dataset we used for our study. You can also download the sample dataset from [this link](). Unzip the contents into ```[study source folder]/static/```. 
+The study packages contains the dataset we used for our study. You can also download the sample dataset from [this link](https://drive.google.com/drive/folders/1gR94POzofFTQ77MwG61Jut5nZVMyvCDy?usp=sharing). Unzip the contents into ```[study source folder]/static/```. 
 
 We are specifically interested in visually differentiating the **timbre** of sound samples.
 This dataset uses samples from the [nSynth dataset](https://magenta.tensorflow.org/datasets/nsynth) and contains ~800 samples of various instruments all playing midi note 64 with 75 velocity.
@@ -134,27 +135,19 @@ If you have any specific questions about using this project, feel free to open u
 # Citation
 If you use this work in your own research please cite our Audio Mostly article.
 
-[CITATION LINK PENDING]
+```CITATION PENDING``
 
+as well as
 
-As well as
+## JATOS
+>Lange K, Kühn S, Filevich E (2015) "Just Another Tool for Online Studies” (JATOS): An Easy Solution for Setup and Management of Web Servers Supporting Online Studies. PLOS ONE 10(6): e0130834. https://doi.org/10.1371/journal.pone.0130834
 
-JATOS
-
-```JATOS CITATION LINK```
 
 If you use samples from the nSynth dataset you should cite:
+>Jesse Engel, Cinjon Resnick, Adam Roberts, Sander Dieleman, Douglas Eck, 
+Karen Simonyan, and Mohammad Norouzi. "Neural Audio Synthesis of Musical Notes 
+with WaveNet Autoencoders." 2017.
 
-```
-@misc{nsynth2017,
-    Author = {Jesse Engel and Cinjon Resnick and Adam Roberts and
-              Sander Dieleman and Douglas Eck and Karen Simonyan and
-              Mohammad Norouzi},
-    Title = {Neural Audio Synthesis of Musical Notes with WaveNet Autoencoders},
-    Year = {2017},
-    Eprint = {arXiv:1704.01279},
-}
-```
 
 
 
