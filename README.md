@@ -58,7 +58,7 @@ proceedings of [Audio Mostly 2019](https://audiomostly.com/).
 
 Please cite this article if you use our study in your own research.
 
-```CITATION PENDING```
+```REFERENCE PENDING```
 
 # Set up
 Install and launch JATOS on your machine, I recommend following the official guide:
@@ -140,7 +140,7 @@ If you have any specific questions about using this project, feel free to open u
 # Citation
 If you use this work in your own research please cite our Audio Mostly article.
 
-```CITATION PENDING``
+```REFERENCE PENDING```
 
 as well as
 
