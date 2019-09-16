@@ -42,6 +42,16 @@ Graph.prototype.showConnections = function (p) {
     });
 }
 
+Graph.prototype.getCoords = function () {
+    coords = []
+    for (var i = 0; i < this.nodes.length; i++) {
+        coords.push([this.nodes[i].x, this.nodes[i].y])
+    }
+    return coords;
+}
+
+
+
 makeGraph = function (coords, physics, imSize) {
     physics.clear();
     nodes = [];

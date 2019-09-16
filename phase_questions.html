@@ -69,7 +69,7 @@
             Survey.Survey.cssType = "bootstrap";
             Survey.defaultBootstrapCss.navigationButton = "btn btn-green";
             var surveyJSON;
-            if(jatos.studySessionData.phase_index ==5){
+            if(jatos.studySessionData.phase_index ==6){
                 var surveyJSON = {pages:[{name:"page1",elements:[{type:"panel",name:"panel1",elements:[{type:"rating",name:"difficulty",title:{default:"How would you rate the degree of difficulty of the tasks?",fr:"Quel était le degré de difficulté des tâches?"},isRequired:true,rateValues:[1,2,3,4,5],minRateDescription:{default:"Very easy",fr:"Très facile"},maxRateDescription:{default:"Very difficult",fr:"Très difficile"}},{type:"rating",name:"visual_help",
                 title:{default:`Did the ${vis_string} help you find the target sound?`,
                 fr:`À quel point la ${vis_string} des éléments vous a aidé dans votre recherche?`},
@@ -88,7 +88,7 @@
                 // surveyJSON = { surveyId: 'b3778aff-52be-4acb-9ba1-d2cd78f9b674'}
                 
             }
-            else if (jatos.studySessionData.phase_index ==6){
+            else if (jatos.studySessionData.phase_index ==7){
             var surveyJSON = {pages:[{name:"page1",elements:[{type:"panel",name:"panel1",elements:[{type:"rating",name:"difficulty",title:{default:"How would you rate the degree of difficulty of the task?",fr:"Quel était le degré de difficulté de la tâche?"},isRequired:true,rateValues:[1,2,3,4,5],minRateDescription:{fr:"Très facile",default:"Very easy"},maxRateDescription:{default:"Very difficult",fr:"Très difficile"}},{type:"rating",name:"visual_help",
             title:{default:`Did the ${vis_string} help you find the target sound?`,
             fr:`À quel point la ${vis_string} des éléments vous a aidé dans votre recherche?`},

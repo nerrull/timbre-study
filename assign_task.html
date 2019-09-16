@@ -46,14 +46,14 @@
         function generateTaskSamples( studyData, mode){
             var taskDict = {};
             var samples = {}
-            var nTasks = [1,4,6,6,6,6];
-            // var nTasks = [1,1,1,1,1,1];
+            var nTasks = [1,5,4 ,6,6,6,6];
+            // var nTasks = [1,1,1,2,1,2,2];
 
 
-            var nSamplesPerTask = [15,30,30,30,30,30];
-            // var nSamplesPerTask = [15,40,40,40,40,40];
+            var nSamplesPerTask = [15,30,30,30,30,30,30];
+            // var nSamplesPerTask = [1,5,1,2,1,2,2];
 
-            // var nSamplesPerTask = [2,2,2,2,2,2];
+            // var nSamplesPerTask = [200,30,30];
 
 
             var totalSamples = nTasks.map((v, i) => nSamplesPerTask[i]*v).reduce((pv, v) => pv+v)
@@ -73,8 +73,12 @@
 
             var nPhases = nTasks.length;
             jatos.studySessionData["num_tasks"] = nTasks;
-            
-            var task_modes = ["PRACTICE","BASELINE", "BASELINE", ...[...Array(3)].map((_,i)=>mode)]
+            jatos.studySessionData["targets"]= [];
+            var targets = []
+
+            var task_modes = ["PRACTICE","BASELINE_RANDOM","BASELINE", "BASELINE",  mode, mode, mode +"_RANDOM"]
+            // var task_modes = [ ...[...Array(3)].map((_,i)=>mode)]
+
             jatos.studySessionData["task_modes"] = task_modes;
             jatos.studySessionData["num_phases"] = nPhases;
             results = {}
@@ -87,6 +91,24 @@
                 
                 for (var t =0; t<nTasks[p]; t++){
                     var sampleList =[];
+                    let temp_target= sampleIndexes[sampleIndex];
+                    let temp_index = sampleIndex;
+                        
+                    //Make sure we haven't already ahd the same target
+                    while (targets.includes(temp_target)){
+                        temp_index ++;
+                        temp_target= sampleIndexes[temp_index]
+                    }
+
+                    //If we had to search for a new target, perform the swap
+                    if (temp_index!=sampleIndexes){
+                        let b = sampleIndexes[temp_index];
+                        sampleIndexes[temp_index]= sampleIndexes[sampleIndex];
+                        sampleIndexes[sampleIndex]=b;
+                        console.log("had to swap samples")
+                    }
+                    targets.push(sampleIndexes[sampleIndex])
+
                     for (var s =0; s<nSamplesPerTask[p]; s++){
                         sampleList.push(sampleIndexes[sampleIndex]);
                         let sample = studyData.samples[sampleIndexes[sampleIndex]];
@@ -101,6 +123,8 @@
             console.log(samples)
             console.log(taskDict)
             jatos.studySessionData["results"] = results;
+            jatos.studySessionData["targets"]= targets;
+            jatos.studySessionData["task_dict"] =taskDict;
 
             return [taskDict, samples];
         }

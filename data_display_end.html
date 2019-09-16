@@ -26,6 +26,9 @@
     <br>
     <button id="db" type="button" class="btn">Télécharger</button>
     <button id="download_button_full" type="button" class="btn">Télécharger résultats détaillés</button>
+
+    <div id="close_message"></div>
+    <button id="continue" type="button" class="btn btn-success">Exit</button>
     
 </div>
 <script>
@@ -69,35 +72,38 @@
         mode = jatos.studySessionData.task_type;
         results = jatos.studySessionData.results;
         formatted_data = {
-            "fields" : ["Partie", "Numero de tache", "Temps (ms)", "# Erreurs", "# Ecoutes"],
+            "fields" : ["Partie", "Numero de tache", "Temps (ms)", "# Erreurs","# sons survolés", "# ecoutes du son cible"],
             "data" :[]
         }
         
         formatted_time_data = {
-            "fields" : ["Partie", "Meilleur temps (ms)", "Pire temps (ms)", "Temps moyen (ms)", "Temps mediane(ms)", "# Erreurs", "# Ecoutes"],
+            "fields" : ["Partie", "Meilleur temps (ms)", "Pire temps (ms)", "Temps moyen (ms)", "Temps mediane(ms)", "# tâches", "# Erreurs","# sons survolés", "# écoutes du son cible"],
             "data" :[]
         }
         all_phase_names = {
             "COLOR":{
-                1:"Partie 1a - Recherche de sons ",
-                2:"Partie 1b - Recherche de sons (rapidement)",
-                3:"Partie 2a - Association entre son et couleur",
-                4:"Partie 2a - Association entre son et couleur (rapidement)",
-                5:"Partie 3 - Recherche de sons à l'aide de la couleur",
+                1: "Partie 1 - Tâches de base",
+                2:"Partie 2a - Recherche de sons ",
+                3:"Partie 2b - Recherche de sons (rapidement)",
+                4:"Partie 3a - Association entre son et couleur",
+                5:"Partie 3b - Association entre son et couleur (rapidement)",
+                6:"Partie 4 - Recherche de sons à l'aide de la couleur",
             },
             "TEXTURE":{
-                1:"Partie 1a - Recherche de sons ",
-                2:"Partie 1b - Recherche de sons (rapidement)",
-                3:"Partie 2a - Association entre sons et textures",
-                4:"Partie 2a - Association entre sons et textures (rapidement)",
-                5:"Partie 3 - Recherche de sons à l'aide de la texture",
+                1: "Partie 1 - Tâches de base",
+                2:"Partie 2a - Recherche de sons ",
+                3:"Partie 2b - Recherche de sons (rapidement)",
+                4:"Partie 3a - Association entre sons et textures",
+                5:"Partie 3b - Association entre sons et textures (rapidement)",
+                6:"Partie 4 - Recherche de sons à l'aide de la texture",
             },
             "SHAPE":{
-                1:"Partie 1a - Recherche de sons ",
-                2:"Partie 1b - Recherche de sons (rapidement)",
-                3:"Partie 2a - Association entre sons et formes",
-                4:"Partie 2a - Association entre sons et formes (rapidement)",
-                5:"Partie 3 - Recherche de sons à l'aide de la forme",
+                1: "Partie 1 - Tâches de base",
+                2:"Partie 2a - Recherche de sons ",
+                3:"Partie 2b - Recherche de sons (rapidement)",
+                4:"Partie 2a - Association entre sons et formes",
+                5:"Partie 2b - Association entre sons et formes (rapidement)",
+                6:"Partie 4 - Recherche de sons à l'aide de la forme",
             }
         }
         console.log(mode);
@@ -110,19 +116,23 @@
             var times = []
             var errors = 0;
             var listens = 0;
+            var plays =0
             for(let task_index =0 ;task_index<Object.keys(phase_data).length;task_index++){
                 task_data = phase_data[task_index];
-                formatted_data["data"].push( [phase_names[phase_index], task_index, task_data["time"], task_data["misclicks"],  task_data["listens"]]);
+                formatted_data["data"].push( [phase_names[phase_index], task_index, task_data["time"], task_data["misclicks"], task_data["num_played"],  task_data["listens"]]);
                 times.push(task_data["time"]);
                 errors += task_data["misclicks"];
+                plays += task_data["num_played"];
                 listens +=  task_data["listens"];
             }
             
             bestTime = Math.min(...times);
             worstTime = Math.max(...times);
             averageTime = times.reduce((a,b) => a + b, 0)/times.length;
+            averagePlayed = plays/times.length;
+            var nTasks = times.length
             medTime = median(times)
-            formatted_time_data["data"].push([phase_names[phase_index], bestTime, worstTime, averageTime, medTime, errors,listens])
+            formatted_time_data["data"].push([phase_names[phase_index], bestTime, worstTime, averageTime, medTime,nTasks, errors, plays, listens])
         }
         
         console.log(formatted_data);
@@ -145,15 +155,24 @@
                     
                     $("#db").click(function(){
                         // debugger;
-                        saveAs(time_csv_blob, "donnees_etude.csv");
+                        saveAs(time_csv_blob, jatos.studySessionData.task_type +"_donnees_etude.csv");
                         // l = createDownloadableCsvFile("donnees_etude.csv", time_csv)
                         console.log("Download")
                     });
                     
                     $("#download_button_full").click(function(){
                         console.log("Download 2")
-                        saveAs(data_csv_blob, "donnees_etude_completes.csv");
+                        saveAs(data_csv_blob, jatos.studySessionData.task_type + "_donnees_etude_completes.csv");
                     });
+                    
+                    
+                    let close = $('<div>').append(data).find('#close_message').find(`#${lang}`);
+                    $('#close_message').html( close );
+                    $("#continue").click(function(){
+                        jatos.endStudy("everything worked fine");
+                    });
+
+                    
                     
                 }
             });

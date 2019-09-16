@@ -54,8 +54,8 @@
 }
 .TaskCanvas{
     display: inline-block;
-    width: 800px;
-    height: 800px;
+     width: 100%;
+    height: 100%; 
 
 }
 

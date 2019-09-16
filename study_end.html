@@ -15,6 +15,11 @@
 </body>
 <div class=FormBox>
     <div id="message_div"></div>
+
+    <div id="close_message"></div>
+
+    <button id="continue" type="button" class="btn btn-success">Exit</button>
+
 </div>
 <script>
     jatos.onLoad(function () {
@@ -29,10 +34,14 @@
                     lang = jatos.studySessionData.language
                 }
                 let message = $('<div>').append(data).find('#end_message').find(`#${lang}`)
-                    $('#message_div').html( message );
-                    document.body.innerHTML = document.body.innerHTML.replace(/ID_STRING/g, jatos.studySessionData["uuid"]);
+                $('#message_div').html( message );
+                document.body.innerHTML = document.body.innerHTML.replace(/ID_STRING/g, jatos.studySessionData["uuid"]);
 
+                $("#continue").click(function(){
+                    jatos.endStudy("everything worked fine");
+                });
                 }
+
             });
             
         });

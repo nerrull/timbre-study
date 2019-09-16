@@ -25,6 +25,61 @@
 </head>
 <body>
 <script>  
+
+function getTitles(sess, mode){
+        var partTitles, subTitles, subsubTitles;
+
+        typeStringsEn = {
+            "COLOR": "colors",
+            "SHAPE": "shapes",
+            "TEXTURE": "textures"
+        }
+        typeStringsEnSingular = {
+            "COLOR": "color",
+            "SHAPE": "shape",
+            "TEXTURE": "texture"
+        }
+
+        typeStringsFR = {
+            "COLOR": "couleurs",
+            "SHAPE": "formes",
+            "TEXTURE": "textures"
+        }
+        typeStringsFRSingular = {
+            "COLOR": "couleur",
+            "SHAPE": "form",
+            "TEXTURE": "texture"
+        }
+
+            partTitles = {
+                "default" : ["Practice","Part 1","Part 2a", "Part 2b", "Part 3a", "Part 3b", "Part 4" ],
+                "fr" : ["Pratique", "Partie 1", "Partie 2a", "Partie 2b", "Partie 3a", "Partie 3b", "Partie 4" ],
+            }
+
+            subTitles = {
+                "default" : [
+                    "", 
+                    "Baseline tasks", 
+                    "Looking for sounds", "Looking for sounds", 
+                    "Associating sounds and "+typeStringsEn[mode], "Associating sounds and "+typeStringsEn[mode],
+                    "Finding sounds using "+  typeStringsEnSingular[mode]
+                ],
+                "fr" : [
+                    "", 
+                    "Tâches de base", 
+                    "Recherche de sons", "Recherche de sons", 
+                    "Association entre sons et "+typeStringsFR[mode] , "Association entre sons et "+typeStringsEn[mode], 
+                    "Recherche de sons à l'aide de la "+  typeStringsFRSingular[mode]
+                ],
+            }
+            subsubTitles = {
+                "default" : ["", "","", "Quickly!", "", "Quickly!", "Quickly!"],
+                "fr" : ["", "","", "Rapidement!", "", "Rapidement!", "Rapidement!"]
+            }
+        
+        return [partTitles, subTitles, subsubTitles];
+    }
+
     jatos.onLoad(function () {
         
         /* create timeline */
@@ -39,39 +94,49 @@
         var sess =jatos.studySessionData;
         console.log(sess);
         console.log(`Task index ${sess.task_index}`);
-        var mode =sess.task_modes[sess.phase_index];
+        var TASK_MODE =sess.task_modes[sess.phase_index];
+
         var samples = sess.task_dict[sess.phase_index][sess.task_index];
         var sample_data = JSON.parse(sessionStorage.getItem("sample_data"));
-        console.log(sample_data)
+        console.log(sample_data);
         var target_index = 0;
+        let isRandom =false;
+
+        if (TASK_MODE.includes("RANDOM")){
+            console.log("RANDOM PHASE")
+            isRandom = true;
+            TASK_MODE = TASK_MODE.split("_")[0]
+            console.log("Extracted mode "+ TASK_MODE+ " from " + sess.task_modes[sess.phase_index])
+        }
+
         for (var i =0; i<samples.length; i++){
             var index = samples[i];
             console.log(index);
             
             var sample= sample_data[index]
             console.log(sample);
-
             test_sounds.push(`static/audio/${sample.name}.mp3`);
-            if (sess.task_modes[sess.phase_index] =="TEXTURE"){
+            if (TASK_MODE =="TEXTURE"){
                 test_images.push(`static/image/${sample.name}.jpg`);
             }
-            if (sess.task_modes[sess.phase_index] =="PRACTICE")(
+            else if (TASK_MODE=="PRACTICE")(
                 target_index = Math.floor(Math.random(0, samples.length))
             )
-            if (sess.phase_index ==5){
+
+            if (isRandom){
+
                 test_coordinates.push([Math.random()*0.8+0.1, Math.random()*0.8+0.1])
             }
             else{
-                //Limit coordinates to 0.1-0.9
+                //Limit coordinates
                 let coords = [0,0];
                 coords[0] = 0.1 + sample.coords[0] *0.8;
                 coords[1] = 0.1 + sample.coords[1] *0.8
                 test_coordinates.push([coords[0], coords[1]])
             }
+
             test_colors.push([sample.color[0], sample.color[1], sample.color[2]])
             test_envelopes.push(sample.env);
-            
-            // test_envelopes.push(sample.env);
         }
         console.log(test_sounds);
         console.log(test_images);
@@ -81,6 +146,17 @@
         if (jatos.studySessionData.language){
             lang = jatos.studySessionData.language
         }
+        titles=  getTitles(sess, TASK_MODE);
+        partTitles= titles[0];
+        subTitles = titles[1];
+        subsubTitles= titles[2];
+
+        title=  partTitles[lang][sess.phase_index];
+        subTitle = subTitles[lang][sess.phase_index]
+        subsubTitle= subsubTitles[lang][sess.phase_index]
+        console.log(title, subTitle, subsubTitle)
+
+        let dims = [$(window).width()-300, $(window).height()-150]
 
         /* define image space trial */
         var image_space = {
@@ -89,10 +165,12 @@
             images: test_images,
             colors: test_colors,
             envelopes: test_envelopes,
-            mode :sess.task_modes[sess.phase_index],
-            
+            mode :TASK_MODE,
+            title : title,
+            subtitle: subTitle,
+            subsubtitle: subsubTitle,
             coordinates : test_coordinates,
-            dims : [800,800],
+            dims : dims,
             image_size: 64,
             target_index: 0,
             task_index: sess.task_index,
@@ -122,7 +200,9 @@
                     {
                         "time": time,
                         "misclicks": misclick,
-                        "listens": listens
+                        "listens": listens,
+                        "num_played": results["played_sounds"].length
+
                     };
                 jatos.studySessionData.volume = results.volume;               
                 jatos.studySessionData.task_index += 1;
